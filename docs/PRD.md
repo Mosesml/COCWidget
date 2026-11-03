@@ -1,6 +1,6 @@
 # COCWidget product requirements
 
-Status: implementation started. Owner: Moses. Targets: iOS and Android, with a browser development preview.
+Status: functional foundation implemented; native validation and public-release work tracked in GOALS.md. Owner: Moses. Targets: iOS and Android, with a browser development preview.
 
 ## Problem and outcome
 
@@ -38,7 +38,7 @@ A player with one or several villages copies Settings → More Settings → Data
 - Reserve already-running upgrades and explicitly separate expected completion from confirmed game state.
 - Let the player queue/remove suggested upgrades, choose a daily play window, set builder/discount assumptions, and inspect resource totals.
 - Present calendar time separately from summed worker time. Resource availability is assumed unless the player enters balances/income; never claim guaranteed affordability.
-- Provide comparisons for supported books, hammers and potions, with known effects and assumptions visible.
+- Provide comparisons for Builder/Research Potions and Books of Building/Fighting, with known effects and assumptions visible. Hammers and additional items are follow-up work.
 
 ### R4 — equipment and ore
 
@@ -71,7 +71,7 @@ A player with one or several villages copies Settings → More Settings → Data
 
 ## Design requirements
 
-Lead with the next decision. Use a compact village switcher, warm paper/graphite surfaces, a restrained amber accent, readable typography, consistent outline icons, tabular countdowns and 44-point touch targets. Game artwork is optional supporting context, not the page structure. Provide clear empty, invalid-import, stale-data, loading and recovery states. The app must work at phone and wide preview widths.
+Lead with the next decision. Use a compact village switcher, warm paper surfaces, forest green with restrained amber accents, readable typography, consistent outline icons, tabular countdowns and 44-point touch targets. Game artwork is optional supporting context, not the page structure. Provide clear empty, invalid-import, stale-data, loading and recovery states. The app must work at phone and wide preview widths.
 
 ## Data and architecture
 
@@ -93,7 +93,7 @@ No automatic fresh game export, direct upgrade execution, base-layout grading, r
 
 ## Sources
 
-- Original research: `../docs/DATA_MODEL.md` (added with the data implementation).
+- Export research and normalized data conventions: [DATA_MODEL.md](DATA_MODEL.md).
 - Reference project: https://github.com/chitti-a7r4/coc-tracker
 - Data catalogue: https://github.com/ClashKingInc/ClashKingAssets
 - Widget support: https://docs.expo.dev/versions/v58.0.0/sdk/widgets/

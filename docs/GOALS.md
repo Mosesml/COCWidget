@@ -52,7 +52,7 @@ Use `[x]` for implemented and checked behavior, `[ ]` for outstanding work. Nati
 - [x] Compile the Android widget module and standalone application.
 - [ ] Compile the iOS app/extension and complete physical-device validation.
 - [ ] Verify iOS widget import/update on a simulator or physical device.
-- [ ] Verify Android widget import/update on an emulator or physical device.
+- [x] Verify Android widget import/update on an emulator (API 34, Pixel launcher).
 
 ## G7 — usable application
 
@@ -61,7 +61,7 @@ Use `[x]` for implemented and checked behavior, `[ ]` for outstanding work. Nati
 - [x] Backup/restore and explicit village deletion.
 - [x] Type check, domain tests, app bundle and interactive checks.
 - [x] CI, setup instructions and validation record.
-- [ ] Final native observations and clean pushed commits.
+- [x] Record native observations and finish with clean pushed commits.
 
 ## Later release work
 
@@ -77,4 +77,5 @@ Use `[x]` for implemented and checked behavior, `[ ]` for outstanding work. Nati
 - Core: full parser, catalogue normalization, account/history models, strategy, scheduler, ore calculations and boost projections pass 11 regression tests. Type checking and initial browser export pass. Interactive app screens are next.
 - App: six browser flows pass across desktop and phone: planning, equipment persistence, history/accounts, valid/invalid imports, all five mobile screens, and corrupted-storage recovery. iOS app bundle exports, both native projects generate, and the Android per-instance module autolinks. Native device release readiness remains open.
 - Hardening: 15 domain tests and seven browser flows pass, including explicit backup replacement. Prerequisite order, invalid war dates, bounded widget timelines and serialized restores are checked. Standalone Android release-preview compilation and the isolated iOS widget registry pass. Native emulator checks are in progress.
+- Native Android: standalone APK installs and launches on the API 34 ARM64 emulator. An 11.7 KB script-generated import link opens directly at review; Save updates the widget timer and export date. Widget configuration and active app account remain independent. The app retains imported data across an APK update. Final shared checks and all seven browser flows pass. iOS native compilation, physical devices, OS edge cases and distribution remain open above.
 

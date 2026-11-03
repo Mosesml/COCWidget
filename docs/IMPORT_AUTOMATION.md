@@ -13,7 +13,7 @@ Create a Shortcut with these actions:
 3. **Text**: `cocwidget://import?data=` followed by the encoded text variable.
 4. **Open URLs** with that Text output.
 
-In Clash of Clans, use Settings → More Settings → Data Export → Copy. Run the Shortcut from its home-screen icon, an Action button assignment, or Shortcuts. COCWidget opens the import preview. Confirm Save village & update widgets to update the local inventory and widgets.
+In Clash of Clans, use Settings → More Settings → Data Export → Copy. Run the Shortcut from its home-screen icon, an Action button assignment, or Shortcuts. A valid link opens directly at the village review; it does not save without confirmation. Confirm Save village & update widgets to update the local inventory and widgets.
 
 You can also experiment with a personal automation when Clash of Clans closes, after explicitly copying the export. That event does not make the game create new JSON, so it can hand off an old clipboard value; the importer rejects old or duplicate snapshots. Actual Shortcut prompts and foreground behavior need physical-device testing.
 
