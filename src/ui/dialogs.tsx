@@ -117,7 +117,7 @@ export function MagicDialog({ onClose }: { onClose: () => void }) {
   return <Sheet title="A little magic, well spent" subtitle="Compare a hypothetical item use against your current timers." onClose={onClose}>
     <View style={[styles.row, { flexWrap: 'wrap' }]}>{([['builderPotion', 'Builder Potion'], ['researchPotion', 'Research Potion'], ['bookBuilding', 'Book of Building'], ['bookHeroes', 'Book of Heroes']] as const).map(([key, label]) => <Button key={key} compact tone={type === key ? 'primary' : 'secondary'} onPress={() => setType(key)}>{label}</Button>)}</View>
     <Card style={{ backgroundColor: color.limeLight }}><Text style={{ color: color.green, fontFamily: font, fontSize: 38, fontWeight: '600', fontVariant: ['tabular-nums'] }}>{duration(result.totalSeconds)}</Text><Text style={styles.body}>Potential {result.measure} saved</Text></Card>
-    {result.savings.slice(0, 8).map(row => <View key={row.name} style={[styles.row, { justifyContent: 'space-between' }]}><Text style={styles.body}>{row.name}</Text><Text style={styles.caption}>{duration(row.seconds)} saved</Text></View>)}
+    {result.savings.slice(0, 8).map((row, index) => <View key={`${row.name}:${index}`} style={[styles.row, { justifyContent: 'space-between' }]}><Text style={styles.body}>{row.name}</Text><Text style={styles.caption}>{duration(row.seconds)} saved</Text></View>)}
     {!result.savings.length && <Text style={styles.caption}>No eligible running upgrades in this snapshot.</Text>}
     <Text style={styles.caption}>This does not use an item in-game or change your saved timers. Builder Potion calculations account for boost expiry rather than subtracting a flat nine hours from every job. Your magic-item inventory is not included in the export.</Text>
   </Sheet>;

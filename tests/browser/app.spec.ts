@@ -79,3 +79,26 @@ test('unreadable saved data is kept until an explicit reset', async ({ page }) =
   await page.getByRole('button', { name: 'Reset local workspace', exact: true }).last().click();
   await expect(page.getByText('Your next chapter starts here', { exact: true })).toBeVisible();
 });
+test('exported backups restore village preferences only after explicit replacement', async ({ page }) => {
+  await page.goto('/');
+  await page.getByRole('tab', { name: 'Equipment', exact: true }).click();
+  await page.getByRole('textbox', { name: 'shiny ore balance', exact: true }).fill('12345');
+  await expect(page.getByRole('textbox', { name: 'shiny ore balance', exact: true })).toHaveValue('12345');
+  await page.getByRole('button', { name: 'Preferences & data', exact: true }).click();
+  const downloaded = page.waitForEvent('download');
+  await page.getByRole('button', { name: 'Export backup', exact: true }).click();
+  const file = await downloaded;
+  const backup = readFileSync((await file.path())!, 'utf8');
+  expect(JSON.parse(backup).workspace.accounts).toHaveLength(2);
+  await page.getByRole('button', { name: 'Close dialog', exact: true }).click();
+  await page.getByRole('textbox', { name: 'shiny ore balance', exact: true }).fill('1');
+  await expect(page.getByRole('textbox', { name: 'shiny ore balance', exact: true })).toHaveValue('1');
+  await page.getByRole('button', { name: 'Preferences & data', exact: true }).click();
+  await page.getByRole('button', { name: 'Restore backup', exact: true }).click();
+  await page.getByRole('textbox', { name: 'Backup JSON', exact: true }).fill(backup);
+  await page.getByRole('button', { name: 'Review backup', exact: true }).click();
+  await expect(page.getByText(/This will replace the current local workspace/)).toBeVisible();
+  await page.getByRole('button', { name: 'Replace this device’s workspace', exact: true }).click();
+  await page.getByRole('tab', { name: 'Equipment', exact: true }).click();
+  await expect(page.getByRole('textbox', { name: 'shiny ore balance', exact: true })).toHaveValue('12345');
+});

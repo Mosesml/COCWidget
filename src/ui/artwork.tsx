@@ -8,7 +8,7 @@ const artwork: Record<number, ImageSourcePropType> = {
   28000006: require('../../assets/28000006.webp'), 4000008: require('../../assets/4000008.webp'),
   90000022: require('../../assets/90000022.webp'), 90000014: require('../../assets/90000014.webp'),
   90000034: require('../../assets/90000034.webp'),
-  73000008: require('../../assets/73000008.webp'),
+  73000004: require('../../assets/73000004.webp'),
 };
 export function Art({ id, size = 46, icon = 'builder', plain = false }: { id?: number; size?: number; icon?: IconName; plain?: boolean }) {
   const source = id ? artwork[id] : undefined;

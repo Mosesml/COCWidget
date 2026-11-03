@@ -49,7 +49,8 @@ Use `[x]` for implemented and checked behavior, `[ ]` for outstanding work. Nati
 - [x] iOS native widget layouts and account configuration (source and generation checked).
 - [x] Android native widget layouts and account-scoped projections (source and autolinking checked).
 - [x] Overview across accounts and accurate snapshot-freshness labels.
-- [ ] Complete native compilation and device validation.
+- [x] Compile the Android widget module and standalone application.
+- [ ] Compile the iOS app/extension and complete physical-device validation.
 - [ ] Verify iOS widget import/update on a simulator or physical device.
 - [ ] Verify Android widget import/update on an emulator or physical device.
 
@@ -58,8 +59,9 @@ Use `[x]` for implemented and checked behavior, `[ ]` for outstanding work. Nati
 - [x] Today, Army, Plan, Equipment and Progress screens with real behavior.
 - [x] Responsive layout, accessible controls and import/empty/error states.
 - [x] Backup/restore and explicit village deletion.
-- [ ] Type check, domain tests, app bundle and interactive checks.
-- [ ] CI, setup instructions, validation record and clean pushed commits.
+- [x] Type check, domain tests, app bundle and interactive checks.
+- [x] CI, setup instructions and validation record.
+- [ ] Final native observations and clean pushed commits.
 
 ## Later release work
 
@@ -74,4 +76,5 @@ Use `[x]` for implemented and checked behavior, `[ ]` for outstanding work. Nati
 - Planning: PRD and working agreement committed before implementation.
 - Core: full parser, catalogue normalization, account/history models, strategy, scheduler, ore calculations and boost projections pass 11 regression tests. Type checking and initial browser export pass. Interactive app screens are next.
 - App: six browser flows pass across desktop and phone: planning, equipment persistence, history/accounts, valid/invalid imports, all five mobile screens, and corrupted-storage recovery. iOS app bundle exports, both native projects generate, and the Android per-instance module autolinks. Native device release readiness remains open.
+- Hardening: 15 domain tests and seven browser flows pass, including explicit backup replacement. Prerequisite order, invalid war dates, bounded widget timelines and serialized restores are checked. Standalone Android release-preview compilation and the isolated iOS widget registry pass. Native emulator checks are in progress.
 

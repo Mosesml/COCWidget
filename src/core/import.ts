@@ -41,6 +41,11 @@ export function parseExport(text: string, now = Date.now()): Snapshot {
   if (exportedAt > now + 300_000) throw new Error('This export is dated in the future. Check your device clock.');
   if (!Array.isArray(raw.buildings)) throw new Error('Buildings are missing. Use the in-game village export, rather than player API JSON.');
   if (raw.boosts !== undefined && !isObject(raw.boosts)) throw new Error('boosts must be a JSON object.');
+  if (isObject(raw.boosts)) {
+    for (const key of ['builder_boost', 'lab_boost', 'pet_boost', 'builder_consumable', 'lab_consumable', 'clocktower_boost', 'clocktower_cooldown']) {
+      integerField(raw.boosts, key, 0, 366 * 86400, 'boosts');
+    }
+  }
   const entities: Entity[] = [], warnings: string[] = [];
   const seenSections: string[] = [];
   const unknown = new Set<number>();
@@ -87,9 +92,10 @@ export function parseExport(text: string, now = Date.now()): Snapshot {
   if (unknown.size) warnings.push(`${unknown.size} item IDs have no catalogue name; their full data was kept.`);
   if (now - exportedAt > 86400000) warnings.push('This snapshot is over a day old. Import again after changes in-game.');
   if (!raw.equipment) warnings.push('Equipment was not supplied in this export; it is unknown rather than empty.');
+  if (!huts) warnings.push('Builder capacity could not be detected. A conservative one-builder assumption is used; adjust it in Preferences.');
   return { id: `${raw.tag}:${raw.timestamp}:${fingerprint(raw)}`, tag: raw.tag.toUpperCase(), exportedAt,
     importedAt: now, townHall: levelOf(1000001), builderHall: levelOf(1000034),
-    builders: huts ? huts + bob : 6, entities, sections: seenSections, boosts: (raw.boosts ?? {}) as JsonObject,
+    builders: huts ? huts + bob : 1, entities, sections: seenSections, boosts: (raw.boosts ?? {}) as JsonObject,
     warnings, raw };
 }
 

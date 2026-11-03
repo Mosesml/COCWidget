@@ -1,11 +1,18 @@
 {
   "name": "coc-widget",
   "version": "0.1.0",
-  "engines": { "node": "^22.13.0 || ^24.3.0 || >=26.0.0" },
+  "engines": {
+    "node": "^22.13.0 || ^24.3.0 || >=26.0.0"
+  },
   "private": true,
   "expo": {
     "autolinking": {
-      "android": { "exclude": ["expo-widgets", "@expo/ui"] }
+      "android": {
+        "exclude": [
+          "expo-widgets",
+          "@expo/ui"
+        ]
+      }
     }
   },
   "main": "index.ts",
@@ -34,6 +41,7 @@
     "expo-modules-core": "~58.0.29",
     "expo-sharing": "~58.0.21",
     "expo-status-bar": "~58.0.4",
+    "expo-system-ui": "~58.0.7",
     "expo-widgets": "~58.0.26",
     "react": "19.3.0",
     "react-dom": "19.3.0",

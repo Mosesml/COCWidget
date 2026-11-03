@@ -8,6 +8,8 @@ import { catalogue, levelAt, lookup } from '../src/core/catalogue';
 import { equipmentCost, recommendations, schedule } from '../src/core/strategy';
 import { finishAt, nextOnline, compareMagicItem } from '../src/core/time';
 import type { JsonObject } from '../src/core/types';
+import { widgetDates, widgetProjection } from '../src/core/widgets';
+import { demoWorkspace } from '../src/data/demo';
 
 const fixture = (name = 'village-export') => JSON.parse(readFileSync(new URL(`./fixtures/${name}.json`, import.meta.url), 'utf8')) as JsonObject;
 const firstRaw = fixture(), laterRaw = fixture('helper-export');
@@ -109,4 +111,44 @@ test('online windows handle overnight play and all-day mode', () => {
   assert.equal(new Date(nextOnline(morning, 8, 23)).getHours(), 8);
   assert.equal(nextOnline(morning, 20, 8), morning);
   assert.equal(nextOnline(morning, 0, 0), morning);
+});
+test('planning waits for a queued laboratory prerequisite even when research was selected first', () => {
+  const raw = fixture();
+  const laboratory = (raw.buildings as JsonObject[]).find(e => e.data === 1000007)!;
+  laboratory.lvl = 2; delete laboratory.timer;
+  const barbarian = (raw.units as JsonObject[]).find(e => e.data === 4000000)!;
+  barbarian.lvl = 2; delete barbarian.timer;
+  const snapshot = parseExport(JSON.stringify(raw), now), preferences = defaults(snapshot.builders);
+  const choices = recommendations(snapshot, preferences, now);
+  const lab = choices.find(c => c.item.id === 1000007)!, research = choices.find(c => c.item.id === 4000000)!;
+  assert.ok(lab && research);
+  assert.ok(research.blockers.includes('Laboratory 3'));
+  const plan = schedule(snapshot, preferences, [research, lab], now);
+  const labStep = plan.steps.find(s => s.key === lab.key)!, researchStep = plan.steps.find(s => s.key === research.key)!;
+  assert.ok(labStep && researchStep); assert.ok(researchStep.start >= labStep.end);
+});
+test('protected heroes are deferred for an impossible or missing war deadline', () => {
+  const preferences = { ...defaults(first.builders), goal: 'war' as const, warDate: '2026-02-31' };
+  const hero = recommendations(first, preferences, first.exportedAt).find(c => c.entity.kind === 'hero')!;
+  assert.ok(hero);
+  assert.ok(hero.blockers.some(text => text.includes('valid war deadline')));
+  const plan = schedule(first, preferences, [hero], first.exportedAt);
+  assert.ok(plan.deferred.some(row => row.name === hero.item.name));
+  assert.equal(plan.steps.filter(s => !s.existing).length, 0);
+});
+test('widget projections keep account selection independent from the active app profile', () => {
+  const workspace = demoWorkspace(now);
+  const a = widgetProjection(workspace, now), b = widgetProjection({ ...workspace, activeTag: '#DEMO12' }, now);
+  assert.deepEqual(a, b); assert.equal(a.accounts.length, 2);
+  assert.equal('raw' in a.accounts[0]!, false);
+  assert.equal(a.accounts[0]!.exportedAt, workspace.accounts[0]!.snapshots[1]!.exportedAt);
+  const dates = widgetDates(a, now);
+  assert.equal(dates[0], now); assert.ok(dates.every((date, i) => i === 0 || date > dates[i - 1]!));
+});
+test('large widget timelines remain bounded and preserve the final completion boundary', () => {
+  const projection = widgetProjection(demoWorkspace(now), now);
+  projection.accounts[0]!.rows = Array.from({ length: 300 }, (_, index) => ({ id: String(index), name: 'Upgrade', level: 'Lv 2', lane: 'builder' as const, extra: false, end: now + (index + 1) * 600000 }));
+  const dates = widgetDates(projection, now);
+  assert.ok(dates.length <= 96);
+  assert.ok(dates[dates.length - 1]! >= now + 300 * 600000);
 });

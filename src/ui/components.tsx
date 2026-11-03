@@ -1,4 +1,4 @@
-import React, { type ReactNode } from 'react';
+import React, { useState, type ReactNode } from 'react';
 import { ActivityIndicator, Image, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View,
   type ImageSourcePropType, type StyleProp, type ViewStyle } from 'react-native';
 import Svg, { Circle, Path, Rect } from 'react-native-svg';
@@ -42,10 +42,13 @@ export function Button({ children, onPress, icon, tone = 'primary', disabled = f
   children: ReactNode; onPress: () => void; icon?: IconName; tone?: 'primary' | 'secondary' | 'ghost' | 'danger'; disabled?: boolean; compact?: boolean; testID?: string; busy?: boolean;
 }) {
   const foreground = tone === 'primary' ? color.paper : tone === 'danger' ? color.red : color.ink;
+  const [hovered, setHovered] = useState(false), [focused, setFocused] = useState(false);
   return <Pressable testID={testID} accessibilityRole="button" accessibilityState={{ disabled: disabled || busy }} disabled={disabled || busy} onPress={onPress}
-    style={({ pressed }) => [styles.button, compact && { paddingHorizontal: 12, minHeight: 40 },
+    onHoverIn={() => setHovered(true)} onHoverOut={() => setHovered(false)} onFocus={() => setFocused(true)} onBlur={() => setFocused(false)}
+    style={({ pressed }) => [styles.button, compact && { paddingHorizontal: 12 },
       tone === 'primary' ? styles.primary : tone === 'ghost' ? { backgroundColor: 'transparent', borderColor: 'transparent' } : styles.secondary,
       tone === 'danger' && { backgroundColor: '#FFF3EF', borderColor: '#F1D8D1' },
+      hovered && { opacity: 0.9 }, focused && Platform.OS === 'web' && { outlineStyle: 'solid', outlineWidth: 2, outlineColor: color.green, outlineOffset: 3 },
       pressed && { transform: [{ scale: 0.96 }] }, (disabled || busy) && { opacity: 0.5 }]}>
     {busy ? <ActivityIndicator size="small" color={foreground} /> : icon ? <Icon name={icon} size={17} tint={foreground} /> : null}
     <Text style={[styles.buttonText, { color: foreground }]}>{children}</Text>

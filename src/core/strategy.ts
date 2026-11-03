@@ -14,6 +14,12 @@ export const armies = [
     names: ['Electro Titan', 'Yeti', 'P.E.K.K.A', 'Rage Spell', 'Freeze Spell', 'Barbarian King', 'Grand Warden', 'Diggy', 'Earthquake Boots', 'Eternal Tome'] },
 ] as const;
 export const armyFor = (id: string) => armies.find(army => army.id === id) ?? armies[0];
+export function warDeadline(value: string): number {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return NaN;
+  const date = new Date(`${value}T00:00:00`);
+  const [year, month, day] = value.split('-').map(Number);
+  return date.getFullYear() === year && date.getMonth() === month! - 1 && date.getDate() === day ? date.getTime() : NaN;
+}
 export function relevant(item: CatalogueItem, preferences: Preferences) {
   return armyFor(preferences.armyId).names.some(name => name.toLowerCase() === item.name.toLowerCase());
 }
@@ -44,6 +50,11 @@ export function recommendations(snapshot: Snapshot, preferences: Preferences, no
     const cost = Object.fromEntries(Object.entries(current.costToNext).map(([key, value]) => [key, Math.floor(value * discount)]));
     const seconds = Math.ceil(current.secondsToNext * discount);
     const blockers = blockersFor(item, entity.level + 1, snapshot);
+    if (entity.kind === 'hero' && entity.village === 'home' && preferences.protectHeroes && (preferences.goal === 'war' || preferences.warDate)) {
+      const deadline = warDeadline(preferences.warDate);
+      if (!Number.isFinite(deadline)) blockers.push('Set a valid war deadline or disable hero protection');
+      else if (now + seconds * 1000 > deadline) blockers.push('This hero cannot finish before the protected war deadline');
+    }
     const reasons: string[] = [];
     const onArmy = relevant(item, preferences);
     let score = 20;
@@ -103,7 +114,7 @@ export function schedule(snapshot: Snapshot, preferences: Preferences, queue: Ca
     }
   }
   const pending = [...new Map(queue.map(candidate => [candidate.key, candidate])).values()];
-  const warDeadline = preferences.warDate ? new Date(`${preferences.warDate}T00:00:00`).getTime() : NaN;
+  const deadline = warDeadline(preferences.warDate);
   while (pending.length) {
     let placed = false;
     for (let index = 0; index < pending.length; index++) {
@@ -123,8 +134,8 @@ export function schedule(snapshot: Snapshot, preferences: Preferences, queue: Ca
       const worker = slots[candidate.lane].indexOf(Math.min(...slots[candidate.lane]));
       const start = nextOnline(Math.max(now, slots[candidate.lane][worker]!, dependencyAt), preferences.onlineStart, preferences.onlineEnd);
       const end = start + candidate.seconds * 1000;
-      if (preferences.protectHeroes && candidate.entity.kind === 'hero' && candidate.entity.village === 'home' && Number.isFinite(warDeadline) && end > warDeadline) {
-        plan.deferred.push({ name: candidate.item.name, reason: 'Would finish after your protected war deadline' });
+      if (preferences.protectHeroes && candidate.entity.kind === 'hero' && candidate.entity.village === 'home' && (preferences.goal === 'war' || preferences.warDate) && (!Number.isFinite(deadline) || end > deadline)) {
+        plan.deferred.push({ name: candidate.item.name, reason: Number.isFinite(deadline) ? 'Would finish after your protected war deadline' : 'Set a valid war deadline or disable hero protection' });
         pending.splice(index, 1); placed = true; break;
       }
       plan.steps.push({ key: candidate.key, entityKey: candidate.entity.key, name: candidate.item.name, from: candidate.from,

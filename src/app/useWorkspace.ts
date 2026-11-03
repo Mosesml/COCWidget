@@ -29,10 +29,12 @@ export function useWorkspace() {
     });
     writes.current = next; return next;
   }, []);
-  const replace = useCallback(async (value: Workspace) => {
-    await writes.current.catch(() => {});
-    await AsyncStorage.setItem(key, encodeBackup(value));
-    current.current = value; setWorkspace(value); setError('');
+  const replace = useCallback((value: Workspace) => {
+    const next = writes.current.catch(() => {}).then(async () => {
+      await AsyncStorage.setItem(key, encodeBackup(value));
+      current.current = value; setWorkspace(value); setError('');
+    });
+    writes.current = next; return next;
   }, []);
   const preferences = useCallback((tag: string, patch: Partial<Preferences>) => commit(value => updateAccount(value, tag, patch)), [commit]);
   return { workspace, commit, replace, preferences, error };
