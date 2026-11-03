@@ -1,33 +1,27 @@
 # Architecture
 
-COCWidget is an Expo 58 / React Native application for iOS and Android. Web shares the same application and domain logic for development and interaction checks; it is not a substitute for a native widget.
+The product is a native Android widget with a small Expo/React Native setup utility and host-side automation scripts. iOS widget source is retained for the next platform phase. There is no website or browser target.
 
-| Layer | Responsibility |
-| --- | --- |
-| `src/core/import.ts` | Validate full village exports, preserve raw fields and decode counted/nested inventory. |
-| `src/core/catalogue.ts` | Access the attributed, pinned game catalogue. |
-| `src/core/strategy.ts` | Explain army priorities, schedule independent lanes, calculate equipment targets/ore. |
-| `src/core/time.ts` | Integrate boost/helper boundaries and compare supported magic items. |
-| `src/core/history.ts` | Compare observed distributions in common snapshot sections. |
-| `src/core/workspace.ts` | Account isolation, backup validation and import replacement rules. |
-| `src/core/widgets.ts` | Serialize small cross-platform widget projections and bounded/coalesced iOS timeline dates. |
-| `src/app/useWorkspace.ts` | Load and serialize local writes through AsyncStorage. |
-| `src/ui/` | Responsive screens, common visual primitives and import/recovery flows. |
-| `src/widgets/*.ios.*` | Expo Widgets/SwiftUI layout, App Group publication and dynamic tag configuration. |
-| `modules/coc-widget/` | Android Expo module, RemoteViews provider and per-widget configuration Activity. |
+## Delivery path
 
-## Why the Android widget has a native adapter
+`export source → sync runner → request ID → native receiver → validated serialized save → widget projection → native publication → acknowledgement`
 
-The current Expo Widgets configuration API supports dynamic account selection on iOS. Android requires configuration per AppWidget ID, so its provider is a small local Kotlin module. Switching the active account never overwrites the per-widget preference. The common projection supplies names, estimated deadlines, next actions and source freshness to both implementations.
+`src/core/sync.ts` owns serialized imports, duplicate/older handling, fresh-export/account guards and acknowledgement ordering. Invalid data cannot replace stored snapshots. Publishing can fail after persistence; retrying the same export republishes without adding duplicate history. Active app village selection does not change on background import.
 
-The iOS widget uses a pure isolated layout function. It cannot read the React app's hooks, state or AsyncStorage directly. The publisher updates the App Group and configuration options after accepted local state changes. Android writes SharedPreferences before refreshing installed widgets. App widget updates are best effort under operating-system limits.
+`src/app/useWorkspace.ts` serializes AsyncStorage writes. `App.tsx` is a compact native setup/import utility: automation enablement, last result, saved villages and backup/recovery. First launch starts empty. Existing local workspaces remain readable.
 
-## Local data and recovery
+## Android transport
 
-Up to 25 villages are stored independently, with up to 60 snapshots each. Persisted backups contain raw exports and account preferences rather than duplicating derived entities. Loading/restore rebuilds and validates snapshots against the current parser. Writes are serialized, size-bounded and saved before the UI accepts the new state. Unreadable data is preserved until explicit restore/reset; a validation failure never replaces it with demo data.
+`scripts/sync-village.ts` validates a file and transfers it to the app-specific external imports directory using ADB. The launch URL contains only a bounded request ID. `CocWidgetModule.readIncomingExport` restricts filenames and size, reads the file and removes it. The app validates/saves and calls the widget bridge before logging a small result with that ID. No raw export/clipboard content is written to the acknowledgement log.
 
-The two clearly labeled example villages are built from public anonymized fixtures and synthetic equipment selections/timestamps. No personal export or key is required to explore the app.
+The runner starts listening before launching the receiver. It reports success only after acknowledgement. `scripts/lib/watch.ts` polls files/directories so atomic rename is supported; delivery failures remain eligible for retry.
 
-## Validation boundaries
+The optional `export-android.ts` runner opens the installed Clash launcher, waits for load, verifies focused package and calibrated screenshot dimensions, then performs recorded menu actions. The device clock sets the minimum acceptable export timestamp. It opens the clipboard receiver after copying; Android clipboard reading occurs while the companion has focus. Profiles support taps, swipes and Back only. They contain no shell commands. Stop on mismatch or missing fresh JSON.
 
-Domain tests, type checking, browser interactions, native project generation, isolated widget serialization and native compilation are different checks. Record them separately in VALIDATION.md. OS delivery, signing and physical-device behavior cannot be inferred from a browser screenshot or a JavaScript bundle.
+The development-only `cocwidget://test-export` source simulates Settings/Copy with a public fixture and a current timestamp. It is excluded from release behavior and makes export/clipboard/delivery regression tests possible without a Clash account. Its verification is explicitly synthetic.
+
+## Widget layer
+
+`src/core/widgets.ts` emits small projections, with saved source time distinct from generated forecast time. Android RemoteViews use native Chronometers, per-AppWidget-ID configuration and best-effort inexact boundary refresh. Separate portrait/landscape views bound visible row counts. iOS uses an isolated SwiftUI layout, App Group data and bounded/coalesced WidgetKit timelines.
+
+The remaining `src/core/` modules retain parsing, catalogue, boost timing, strategy, equipment and history logic. Raw exports remain the source of truth. See DATA_MODEL.md for assumptions, THIRD_PARTY.md for catalogue/fixture notices, and VALIDATION.md for actual checked platform behavior.

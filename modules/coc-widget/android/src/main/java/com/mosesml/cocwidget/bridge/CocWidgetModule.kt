@@ -3,6 +3,8 @@ package com.mosesml.cocwidget.bridge
 import expo.modules.kotlin.modules.Module
 import expo.modules.kotlin.modules.ModuleDefinition
 import org.json.JSONObject
+import android.util.Log
+import java.io.File
 
 class CocWidgetModule : Module() {
   override fun definition() = ModuleDefinition {
@@ -15,6 +17,26 @@ class CocWidgetModule : Module() {
       // commit() precedes widget refresh, so a receiver never sees half-written state.
       check(VillageWidgetProvider.preferences(context).edit().putString("projection", json).commit()) { "Could not persist widget data" }
       VillageWidgetProvider.updateAll(context)
+    }
+    AsyncFunction("reportSyncResult") { json: String ->
+      require(json.length <= 2048) { "Sync result is too large" }
+      val result = JSONObject(json)
+      require(result.optString("requestId").matches(Regex("[A-Za-z0-9_-]{1,80}"))) { "Invalid request ID" }
+      val context = appContext.reactContext ?: throw IllegalStateException("Application is not ready")
+      check(VillageWidgetProvider.preferences(context).edit().putString("lastSync", json).commit())
+      // Only delivery metadata, never the village export or clipboard contents.
+      Log.i("CocWidgetSync", json)
+    }
+    AsyncFunction("readIncomingExport") { requestId: String ->
+      require(requestId.matches(Regex("[A-Za-z0-9_-]{1,80}"))) { "Invalid request ID" }
+      val context = appContext.reactContext ?: throw IllegalStateException("Application is not ready")
+      val directory = context.getExternalFilesDir("imports") ?: throw IllegalStateException("Import storage is unavailable")
+      val file = File(directory, "$requestId.json")
+      require(file.isFile && file.length() <= 1_000_000) { "Export file is missing or too large" }
+      try { file.readText(Charsets.UTF_8) } finally { file.delete() }
+    }
+    AsyncFunction("moveToBackground") {
+      appContext.currentActivity?.let { activity -> activity.runOnUiThread { activity.moveTaskToBack(true) } }
     }
   }
 }

@@ -1,7 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { demoWorkspace } from '../data/demo';
-import { decodeBackup, encodeBackup, updateAccount } from '../core/workspace';
+import { decodeBackup, emptyWorkspace, encodeBackup, updateAccount } from '../core/workspace';
 import type { Preferences, Workspace } from '../core/types';
 
 const key = '@cocwidget/workspace-v1';
@@ -13,7 +12,7 @@ export function useWorkspace() {
   useEffect(() => {
     let active = true;
     AsyncStorage.getItem(key).then(text => {
-      const value = text ? decodeBackup(text) : demoWorkspace();
+      const value = text ? decodeBackup(text) : emptyWorkspace();
       if (active) { current.current = value; setWorkspace(value); }
     }).catch(() => {
       if (active) setError('Your saved data could not be read. It has been kept intact. Restore a backup, or explicitly reset this device.');

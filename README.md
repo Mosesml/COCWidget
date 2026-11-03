@@ -1,83 +1,60 @@
 # COCWidget
 
-A local-first Clash of Clans companion for **iOS and Android**. Turn a village export into a useful next action, a practical upgrade plan, equipment targets and visible progress. Native home-screen widgets keep selected villages close at hand.
+**Android home-screen widgets and automatic village JSON delivery.** No website. The small native companion configures imports, stores villages and publishes widget data.
 
-![COCWidget Today screen](docs/screenshots/today-desktop.png)
+Android is the first delivery target. iOS widget source is retained; its device integration is the next phase in [the PRD](docs/PRD.md).
 
-## What works
+## Run the Android app
 
-- **Today and My army:** three curated army templates, current-hall targets, explained priorities, prerequisites and war-date protection.
-- **Upgrade plan:** editable queue, independent builder/research/pet/Base lanes, online hours, estimated costs, and supported potion/book comparisons.
-- **Equipment:** owned levels, target levels, ability breakpoints, exact catalogue ore sums and manually entered balances.
-- **Progress:** saved snapshots, wall/hero changes, history comparison and a shareable text report.
-- **Multiple villages:** separate goals, queues and history; widget configuration by village or all-villages overview.
-- **Import and recovery:** paste, JSON file or validated application link; review before saving; raw/unknown fields preserved; backup/restore and explicit deletion.
-
-The first launch has two clearly labeled sample villages. Personal exports stay in local application storage. No account, API key or backend is needed.
-
-## Run locally
-
-Use **Node 22 LTS** (`.nvmrc` is included):
+Use Node 22 LTS, an Android SDK/JDK and a connected emulator/device:
 
 ```sh
 nvm use
 npm ci
-npm run web
-```
-
-The browser runs the real app/domain logic and persists locally. Native widgets require a native build; they are not installed by the browser or Expo Go.
-
-For Android, install Android Studio/SDK and a supported JDK, start an emulator or connect a device, then run:
-
-```sh
 npm run android
 ```
 
-For iOS, install full Xcode and its simulator components, then run:
+Open COCWidget once and enable **Automatic imports**. Add its home-screen widget through your launcher and choose a village after the first import. Each widget keeps its own selection.
+
+## Send or watch existing exports
+
+Enable USB debugging and find your device with `adb devices`:
 
 ```sh
-npm run ios
+npm run sync -- --device SERIAL --file village.json
+npm run sync -- --device SERIAL --watch /path/to/export-folder
 ```
 
-Generated `android/` and `ios/` projects are ignored. Native source lives in the local Android module, widget TypeScript and Expo configuration; `npx expo prebuild` recreates the projects. iOS device signing and the App Group require your Apple team configuration. A physical phone build is required to test the Shortcut end to end.
+The runner validates the full JSON, transfers it to app-specific device storage, and waits for the native app to save and refresh the widget. It prints success only after the widget bridge acknowledges publication. No Save prompt is required after the one-time automation setting. Failed delivery is retried by the watcher; duplicates do not add history, and older snapshots never replace newer data.
 
-## Can imports be automatic?
+The watcher consumes files produced elsewhere. It does not generate game exports.
 
-**Widget updates are automatic after an accepted import.** Obtaining a fresh snapshot still starts with Clash's **Settings → More Settings → Data Export → Copy**. A script cannot ask the game to generate that private export through the public player API.
-
-On iPhone, a Shortcut can send explicitly copied JSON to `cocwidget://import?data=…`; COCWidget reviews it before saving. On either platform, paste/file import works. The helper generates a handoff link without uploading anything:
+## Automate the Android game export menu
 
 ```sh
-node scripts/import-link.mjs village.json > import-url.txt
-# macOS, after explicitly copying the export:
-pbpaste | node scripts/import-link.mjs > import-url.txt
+npm run export:android -- --device SERIAL --calibrate /private/path/device.json
+npm run export:android -- --device SERIAL --profile /private/path/device.json
+npm run export:android -- --device SERIAL --profile /private/path/device.json --interval 900
 ```
 
-See [the handoff guide](docs/IMPORT_AUTOMATION.md) for the exact Shortcut actions, URL-length fallback and platform limitations.
+Calibration records Settings → More Settings → Data Export → Copy and the taps that close those menus again. A screenshot is saved beside the profile after each recorded step. The runner checks foreground package, calibrated screen dimensions, new-export timestamp and optional expected player tag before acknowledging a refresh.
 
-## Checks
+This route requires the host script, USB debugging, an unlocked connected Android device and calibration for that device/game layout. It briefly occupies the device each cycle. It is not silent background export from an ordinary locked phone. Stop with Ctrl+C. A failed export stops the menu runner rather than repeating uncertain taps. See [the automation guide](docs/IMPORT_AUTOMATION.md) for setup and current verification boundaries.
+
+## Checks and progress
 
 ```sh
-npm run check                       # TypeScript, domain tests, web export
-npx playwright install chromium     # first-time browser setup (CI uses this)
-npm run test:browser                # Chromium installed above
-npx expo prebuild --platform ios --no-install
-npm run check:widget-layout         # isolated iOS widget serialization
+npm run check                 # TypeScript, domain/automation tests, native JS bundles
+npm run check:widget-layout   # isolated iOS layout registry (after iOS prebuild)
 ```
 
-Continuous checks run on pushes to `main` and pull requests. The **Native compilation** workflow can be run manually to compile Android and an unsigned iOS simulator build. See [validation and remaining device checks](docs/VALIDATION.md); generating a native project or exporting JavaScript does not establish device compatibility.
-
-To use an already installed Google Chrome instead, run `PLAYWRIGHT_CHANNEL=chrome npm run test:browser`.
-
-## Product and development
-
-- [PRD and acceptance criteria](docs/PRD.md)
-- [Goals and implementation checkpoints](docs/GOALS.md)
+- [PRD and platform roadmap](docs/PRD.md)
+- [Goals/checkpoints](docs/GOALS.md)
+- [Validation record](docs/VALIDATION.md)
 - [Architecture](docs/ARCHITECTURE.md)
-- [Data model, catalogue and forecast assumptions](docs/DATA_MODEL.md)
-- [Interface review](docs/DESIGN_REVIEW.md)
-- [Sources and notices](THIRD_PARTY.md)
+- [Data model and assumptions](docs/DATA_MODEL.md)
+- [Third-party notices](THIRD_PARTY.md)
 
-The pinned catalogue has **1,140 normalized entities**, with source provenance and targeted regression checks. Refresh it reproducibly with `npm run data:sync`. Some special operations, merge rules and newly introduced IDs are preserved for inspection but are not scheduled automatically. Schedules assume resources will be available; entered ore balances are manual. Timers are conditional estimates from a saved snapshot, not confirmation of in-game completion.
+Exports stay local. The pinned catalogue contains 1,140 normalized entities; complete raw/unknown fields are preserved. Countdown completion is a prediction until another export confirms it. Catalogue/boost audits, iOS device testing, additional Android launchers and signed public distribution remain release work.
 
-This is an unofficial fan project, not affiliated with or endorsed by Supercell. Clash of Clans artwork and trademarks belong to Supercell. Catalogue and fixture notices are retained in [THIRD_PARTY.md](THIRD_PARTY.md).
+This is an unofficial fan project, not affiliated with or endorsed by Supercell.

@@ -1,81 +1,50 @@
 # COCWidget goals
 
-Use `[x]` for implemented and checked behavior, `[ ]` for outstanding work. Native integrations require explicit device validation before being called release ready.
+Current priority from Moses: **widget + working automatic refresh, Android first; no website**. Work on main, commit frequently, push only to Mosesml/COCWidget.
 
-## G0 — project and scope
+## Current Android milestone
 
-- [x] Confirm the only push destination is Mosesml/COCWidget and work on main.
-- [x] Write a PRD with acceptance criteria for all five product capabilities.
-- [x] Establish this goals area and a small-commit working agreement.
-- [x] Bootstrap the shared iOS/Android app and repeatable checks.
+- [x] Remove web target, server, dashboard screens, website assets and browser tooling.
+- [x] Keep a small native widget/import setup utility.
+- [x] Serialize validate → persist → publish → acknowledge.
+- [x] Automatic import mode without a per-import Save prompt.
+- [x] Idempotent retries, older-snapshot rejection and independent village identity.
+- [x] Bounded file transfer instead of oversized ADB command URLs.
+- [x] File/directory watcher, partial writes, atomic replacement and acknowledgement retries.
+- [x] Device-specific export profile calibration and connected Android menu runner.
+- [x] Foreground/screen checks, fresh-export guard and optional expected player tag.
+- [x] Type checking and 24 domain/automation tests.
+- [x] Android and iOS JavaScript bundle exports after removing the website.
+- [ ] Compile the updated native bridge and standalone Android application.
+- [ ] Verify script acknowledgement and automatic widget refresh on the emulator.
+- [ ] Verify the export-menu runner end to end using the development-only synthetic export source.
+- [ ] Verify calibration and repeated export against a real installed Clash client.
+- [ ] Record final checks and push clean checkpoints.
 
-## G1 — data foundation
+## iOS phase (retained in PRD)
 
-- [x] Preserve complete exports, decode inventory and traverse nested modules.
-- [x] Version and attribute the catalogue with explicit normalization rules.
-- [x] Validate imports before saving and retain unknown fields/IDs.
-- [x] Persist multiple villages, history, goals, queue and ore targets independently.
-- [x] Verify raw preservation, timestamps, counts, partial snapshots and backup validation.
+- [x] Shared receiver logic, SwiftUI layout and App Group publisher source.
+- [ ] Full Xcode app/extension compilation.
+- [ ] Actual iPhone Shortcut import/update and per-widget account tests.
+- [ ] Background-capable App Intent/share delivery investigation.
+- [ ] Document the fresh-export source available on iOS; app-close automation alone is not an export.
 
-## G2 — improve my army
+## Foundation retained
 
-- [x] Army templates and explained upgrade priorities.
-- [x] Goal selection and attainable research/equipment targets.
-- [x] Readiness breakdown with supported prerequisites.
+- [x] Complete raw exports, counted walls, nested module timers and unknown fields.
+- [x] Pinned, attributed catalogue with cost/duration normalization.
+- [x] Multiple accounts, snapshot history, backup/restore validation.
+- [x] Army priorities, prerequisite scheduling, ore arithmetic and progress comparison in the domain layer.
+- [x] Prior Android widget test observed countdowns, source dates, account isolation and an expected-completion boundary.
 
-## G3 — practical plan
+## Release work
 
-- [x] Queue editing and separate worker/research lanes.
-- [x] Existing upgrades, dependencies, online hours and protected hero deadlines.
-- [x] Resource totals and honest duration/affordability assumptions.
-- [x] Supported magic-item and boost comparisons (two potions and two books).
-
-## G4 — equipment and ore
-
-- [x] Equipment inventory, level targets and catalogue ability breakpoints.
-- [x] Ore costs, entered balances and deficits.
-- [x] Persistent, army-aware spending priorities.
-
-## G5 — progress
-
-- [x] Snapshot history and aggregate level changes.
-- [x] Wall/hero milestones and missing-section handling.
-- [x] Share/export a readable progress report (native delivery still needs a device check).
-
-## G6 — import and widgets
-
-- [x] Paste/file preview and automatic widget projection after save.
-- [x] Validated import deep links and an iOS Shortcut guide.
-- [x] iOS native widget layouts and account configuration (source and generation checked).
-- [x] Android native widget layouts and account-scoped projections (source and autolinking checked).
-- [x] Overview across accounts and accurate snapshot-freshness labels.
-- [x] Compile the Android widget module and standalone application.
-- [ ] Compile the iOS app/extension and complete physical-device validation.
-- [ ] Verify iOS widget import/update on a simulator or physical device.
-- [x] Verify Android widget import/update on an emulator (API 34, Pixel launcher).
-
-## G7 — usable application
-
-- [x] Today, Army, Plan, Equipment and Progress screens with real behavior.
-- [x] Responsive layout, accessible controls and import/empty/error states.
-- [x] Backup/restore and explicit village deletion.
-- [x] Type check, domain tests, app bundle and interactive checks.
-- [x] CI, setup instructions and validation record.
-- [x] Record native observations and finish with clean pushed commits.
-
-## Later release work
-
-- [ ] Audit each supported cost/duration/prerequisite against the current game.
-- [ ] Real exports covering all speed effects and special operations.
-- [ ] Additional launchers, accessibility font sizes and timezone/DST device checks.
-- [ ] Signing, TestFlight/Play testing, store assets and public distribution.
-- [ ] Optional public clan/war API service and share extensions/App Intents.
+- [ ] Current live-game catalogue, special-operation and boost audit.
+- [ ] Alternate launchers, resize/rotation, larger text, DST, Doze and long-running device checks.
+- [ ] Phone-only export automation feasibility; the current Android menu runner uses an unlocked ADB-connected device and a host.
+- [ ] Signing, distribution and public user setup testing.
 
 ## Checkpoints
 
-- Planning: PRD and working agreement committed before implementation.
-- Core: full parser, catalogue normalization, account/history models, strategy, scheduler, ore calculations and boost projections pass 11 regression tests. Type checking and initial browser export pass. Interactive app screens are next.
-- App: six browser flows pass across desktop and phone: planning, equipment persistence, history/accounts, valid/invalid imports, all five mobile screens, and corrupted-storage recovery. iOS app bundle exports, both native projects generate, and the Android per-instance module autolinks. Native device release readiness remains open.
-- Hardening: 15 domain tests and seven browser flows pass, including explicit backup replacement. Prerequisite order, invalid war dates, bounded widget timelines and serialized restores are checked. Standalone Android release-preview compilation and the isolated iOS widget registry pass. Native emulator checks are in progress.
-- Native Android: standalone APK installs and launches on the API 34 ARM64 emulator. An 11.7 KB script-generated import link opens directly at review; Save updates the widget timer and export date. Widget configuration and active app account remain independent. The app retains imported data across an APK update. Final shared checks and all seven browser flows pass. iOS native compilation, physical devices, OS edge cases and distribution remain open above.
-
+- Initial foundation: six commits established parser, catalogue, widgets and native/browser prototype. Moses reprioritized the widget and script; website scope was removed.
+- Automatic delivery: 24 tests pass, including save-before-ack, missing-ack retry, stale/wrong-village guards and atomic-file watching. Native receiver, ADB file delivery and calibrated menu runner are implemented; updated device verification is in progress.

@@ -1,52 +1,61 @@
-# Getting village JSON into the widget
+# Automatic widget refresh
 
-The game must produce a fresh export. Once the export is accepted, COCWidget stores it and publishes updated widget projections automatically. It does not continuously observe the game.
+Android first. This product has three distinct stages: producing a fresh game export, delivering JSON, and publishing widget data. A watcher alone only handles delivery.
 
-## iPhone: Shortcut handoff
+## Android setup
 
-Install a native COCWidget build first; Expo Go and the browser preview do not register the final application scheme or install widgets.
+1. Install the native COCWidget app (`npm run android` for a development build).
+2. Open it once and enable **Automatic imports**. This allows valid sync requests to save and refresh without a Save prompt.
+3. Enable Android USB debugging, connect the device and find its serial with `adb devices`. Node 22 and Android platform-tools must be available on the host; `--adb /absolute/path/to/adb` overrides the binary.
+4. Import once, then add COCWidget from your launcher's widget picker. Each installed widget selects its own village or overview.
 
-Create a Shortcut with these actions:
-
-1. **Get Clipboard**.
-2. **URL Encode** the clipboard text (Encode, not Decode).
-3. **Text**: `cocwidget://import?data=` followed by the encoded text variable.
-4. **Open URLs** with that Text output.
-
-In Clash of Clans, use Settings → More Settings → Data Export → Copy. Run the Shortcut from its home-screen icon, an Action button assignment, or Shortcuts. A valid link opens directly at the village review; it does not save without confirmation. Confirm Save village & update widgets to update the local inventory and widgets.
-
-You can also experiment with a personal automation when Clash of Clans closes, after explicitly copying the export. That event does not make the game create new JSON, so it can hand off an old clipboard value; the importer rejects old or duplicate snapshots. Actual Shortcut prompts and foreground behavior need physical-device testing.
-
-No import URL is sent to a backend. A URL contains the village snapshot itself, so use a JSON file if the platform refuses a long URL. Keep clipboard/file import available as the reliable alternative.
-
-## Android
-
-Open COCWidget and use Paste from clipboard or Choose JSON file. Confirm the preview. Native widget projections are saved and every installed COCWidget widget refreshes; each widget retains its own selected village or overview mode.
-
-Android restricts clipboard access to the focused app/default keyboard, so a background clipboard watcher is not a dependable import strategy. A future share extension can provide another explicit handoff; it is separate from game synchronization.
-
-## Script helper
-
-Generate an import URL from an exported JSON file:
+## Deliver one file
 
 ```sh
-node scripts/import-link.mjs village.json > import-url.txt
+npm run sync -- --device SERIAL --file village.json
 ```
 
-Or use stdin, including an explicit macOS clipboard read:
+The runner fully validates JSON before sending. It uses an app-specific file rather than embedding the full export in a shell URL. A unique request ID is sent to the app; the native module reads and deletes the transfer file. The app saves first, publishes the widget projection second, then acknowledges the request. Success means the native widget bridge accepted the update; the host does not infer success from `am start`.
+
+The app returns to the background after a successful automated import. Invalid data, disabled automation, an unavailable widget bridge or a timeout produce an error. Retry the same file safely: duplicates republish current state without duplicating history. Older snapshots leave newer data intact and report `ignored_older`.
+
+## Watch exports
 
 ```sh
-pbpaste | node scripts/import-link.mjs > import-url.txt
+npm run sync -- --device SERIAL --watch /path/to/village.json
+npm run sync -- --device SERIAL --watch /path/to/export-folder
 ```
 
-The helper validates the basic export shape and prints only the local application URL. It does not upload, watch the clipboard, access the game, or start an upgrade. Transfer/open the URL on a device with the native app installed. Do not assume a desktop URL opens an iPhone automatically.
+The watcher polls once a second, supports atomic file replacement and ignores files until their JSON validates. Only acknowledged snapshots are skipped on later scans. Missing acknowledgement or failed publication remains eligible for retry. Stop with Ctrl+C. It watches the chosen local source; it does not upload to a server or ask Clash to generate data.
 
-## Platform widget behavior
+## Generate fresh JSON through Android's export menu
 
-iOS uses an App Group, dynamic village configuration and WidgetKit timelines. The shared payload contains every saved village; each widget selects its own tag. Scheduled entries handle predicted completion boundaries, while system Text timers animate countdowns.
+```sh
+npm run export:android -- --device SERIAL --calibrate /private/path/device.json
+```
 
-Android uses a local Expo module with RemoteViews. Its configuration Activity stores the selected tag per AppWidget ID. SharedPreferences are written before refresh. Native Chronometers count down without a running React app; OS periodic updates and an inexact boundary alarm refresh rows. Android may delay alarms/updates under Doze or battery restrictions.
+The calibration wizard opens Clash and saves a current screenshot beside the profile. Open that image to locate menu controls. Enter `tap x y`, `swipe x y endX endY`, or `back` to perform and record an action. Follow Settings → More Settings → Data Export → Copy, including any scroll required to reach Copy. Record the steps to close those menus back to the village so the next cycle begins in the same state. Enter `done`, then optionally enter the expected player tag. Keep the profile private/local; it is not committed to the repo.
 
-Switching the active village in the app never changes the configured tag of a widget. Removing a selected village produces an explicit removed-village state rather than silently showing a different account.
+Test one export:
 
-Sources: [Android clipboard restrictions](https://developer.android.com/about/versions/10/privacy/changes), [Apple paste controls](https://developer.apple.com/documentation/uikit/uipastecontrol), [WidgetKit update scheduling](https://developer.apple.com/documentation/widgetkit/keeping-a-widget-up-to-date), [Android widget configuration](https://developer.android.com/develop/ui/views/appwidgets/configuration).
+```sh
+npm run export:android -- --device SERIAL --profile /private/path/device.json
+```
+
+Then run repeatedly, for example every 15 minutes:
+
+```sh
+npm run export:android -- --device SERIAL --profile /private/path/device.json --interval 900
+```
+
+The script requires the host to keep running and the connected Android device to stay unlocked. It briefly takes over the screen each cycle. It verifies foreground package before each tap and calibrated dimensions before the sequence. It then opens COCWidget in the foreground to read the clipboard; Android blocks ordinary background clipboard readers. A minimum export timestamp from the device clock and optional expected tag prevent an unchanged/wrong clipboard value being reported as a new successful export. A failure stops the menu runner. Recalibrate after screen/layout changes.
+
+**Verification boundary:** the production code uses the installed `com.supercell.clashofclans` client. Its exact menu sequence must be calibrated/tested on the user's game version. The development-only `--test-source` flag targets a labeled synthetic export source in a debug COCWidget build. Synthetic tests establish the runner/clipboard/receiver/widget chain; they do not establish a live Clash profile or reliable operation while the device is locked.
+
+## iOS next phase
+
+The Android ADB transport does not deliver directly to an iPhone. The retained iOS receiver/widget code needs native compilation and device tests.
+
+Planned Shortcut: **Get Clipboard → URL Encode → Open URLs**, using `cocwidget://sync?data=` followed by encoded text. With Automatic imports enabled, a valid request saves and publishes without an app Save prompt. An App/Is Closed personal automation can trigger that handoff when leaving Clash. It still needs a fresh export in the clipboard; that event does not make the game export JSON. An App Intent/share extension is tracked separately in the PRD.
+
+Sources: [Android clipboard restrictions](https://developer.android.com/privacy-and-security/risks/secure-clipboard-handling), [Apple app trigger behavior](https://support.apple.com/en-tm/guide/shortcuts/apde31e9638b/ios), [Apple automatic shortcut triggers](https://support.apple.com/en-euro/guide/shortcuts/apdfbdbd7123/10.0/ios/27).

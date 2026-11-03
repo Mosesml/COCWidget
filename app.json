@@ -19,10 +19,7 @@
         "backgroundColor": "#253D2B"
       }
     },
-    "web": {
-      "bundler": "metro",
-      "name": "COCWidget"
-    },
+    "platforms": ["ios", "android"],
     "plugins": [
       "expo-sharing",
       [

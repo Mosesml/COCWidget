@@ -1,6 +1,7 @@
 node_modules/
 .expo/
 dist/
+native-bundles/
 coverage/
 test-results/
 playwright-report/
@@ -22,4 +23,6 @@ local.properties
 **/.kotlin/
 /modules/**/build/
 /native-ios-build/
+*.screen.png
+automation-profiles/
 

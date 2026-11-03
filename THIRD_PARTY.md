@@ -4,7 +4,7 @@ Game catalogue: [ClashKing Assets](https://assets.clashk.ing), https://github.co
 
 Public anonymized test fixtures: https://github.com/chitti-a7r4/coc-tracker, commit `bfc032175fe1d87235e7e97f6fea5a75cf3a4d48`. The project's MIT notice is retained in `licenses/coc-tracker-MIT.txt`. The Android application code was not copied into COCWidget.
 
-Clash of Clans and game artwork, names and trademarks belong to Supercell. This is an unofficial fan companion, not affiliated with or endorsed by Supercell. Bundled hero, troop, pet and equipment cutouts accompany the attributed catalogue; game artwork remains subject to Supercell's rights and fan-content terms. See https://supercell.com/en/fan-content-policy/.
+Clash of Clans and game artwork, names and trademarks belong to Supercell. This is an unofficial fan companion, not affiliated with or endorsed by Supercell. The website/game-art cutouts have been removed. Game names and data remain subject to their respective rights and source notices. See https://supercell.com/en/fan-content-policy/.
 
 The four-tile application mark is original to COCWidget. Its raster launcher assets are reproducible with `python3 scripts/generate-icons.py` (Pillow required only to regenerate the artwork).
 
