@@ -9,7 +9,7 @@ import type { SyncResult } from '../../src/core/sync';
 const exec = promisify(execFile);
 export const wait = (milliseconds: number) => new Promise(resolve => setTimeout(resolve, milliseconds));
 export class AndroidDevice {
-  constructor(readonly serial: string, readonly adb = process.env.ADB ?? 'adb') {
+  constructor(readonly serial: string, readonly adb = process.env.ADB ?? 'adb', readonly token = process.env.COCWIDGET_TOKEN) {
     if (!/^[A-Za-z0-9_.:-]{1,100}$/.test(serial)) throw new Error('Specify a valid Android device serial.');
   }
   async run(...args: string[]) {
@@ -17,6 +17,7 @@ export class AndroidDevice {
     return result.stdout.trim();
   }
   async check() {
+    if (!this.token || !/^[a-f0-9]{64}$/.test(this.token)) throw new Error('Set COCWIDGET_TOKEN to the automation pairing code copied from COCWidget settings.');
     if (await this.run('get-state') !== 'device') throw new Error('The selected Android device is not ready.');
     const packages = await this.run('shell', 'pm', 'list', 'packages', 'com.mosesml.cocwidget');
     if (!packages.split('\n').some(line => line.trim() === 'package:com.mosesml.cocwidget')) throw new Error('Install the native COCWidget app on this device first.');
@@ -32,7 +33,7 @@ export class AndroidDevice {
       await writeFile(local, text, { mode: 0o600 });
       await this.run('shell', 'mkdir', '-p', remoteDirectory);
       await this.run('push', local, remote);
-      return await this.deliverLink(`cocwidget://sync-file?requestId=${id}&background=1`, id, timeout);
+      return await this.deliverLink(`cocwidget://sync-file?requestId=${id}&background=1&token=${this.token}`, id, timeout);
     } finally {
       await rm(directory, { recursive: true, force: true });
       await this.run('shell', 'rm', '-f', remote).catch(() => {});
@@ -40,7 +41,7 @@ export class AndroidDevice {
   }
   async clipboard(notBefore: number, tag?: string, timeout = 20_000) {
     const id = randomUUID();
-    const uri = `cocwidget://sync-clipboard?requestId=${id}&background=1&notBefore=${Math.floor(notBefore / 1000)}${tag ? `&tag=${encodeURIComponent(tag)}` : ''}`;
+    const uri = `cocwidget://sync-clipboard?requestId=${id}&background=1&token=${this.token}&notBefore=${Math.floor(notBefore / 1000)}${tag ? `&tag=${encodeURIComponent(tag)}` : ''}`;
     return this.deliverLink(uri, id, timeout);
   }
   private async deliverLink(uri: string, requestId: string, timeout: number): Promise<SyncResult> {
@@ -63,11 +64,12 @@ export class AndroidDevice {
           const line = buffer.slice(0, end).trim(); buffer = buffer.slice(end + 1);
           try {
             const result = JSON.parse(line) as SyncResult;
-            if (result.requestId === requestId && typeof result.widgetUpdated === 'boolean') settle(result);
+            if (result.requestId === requestId && isSyncResult(result)) settle(result);
           } catch {}
         }
       });
     });
+    logs.stderr.resume();
     // Install rejection handling before ADB launch, including an immediate missing-binary failure.
     void acknowledged.catch(() => {});
     try {
@@ -81,4 +83,12 @@ export class AndroidDevice {
       throw error;
     } finally { clearTimeout(timer!); logs.kill(); }
   }
+}
+export function isSyncResult(result: unknown): result is SyncResult {
+  if (!result || typeof result !== 'object') return false;
+  const r = result as SyncResult;
+  return ['updated', 'unchanged', 'ignored_older', 'disabled', 'failed'].includes(r.status)
+    && typeof r.widgetUpdated === 'boolean' && Number.isSafeInteger(r.completedAt)
+    && (!r.widgetUpdated || (['updated', 'unchanged', 'ignored_older'].includes(r.status)
+      && typeof r.tag === 'string' && /^#[A-Z0-9]{3,20}$/.test(r.tag) && Number.isSafeInteger(r.exportedAt)));
 }

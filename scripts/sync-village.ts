@@ -25,7 +25,9 @@ async function main() {
       if (values.url) {
         if (!values.file) throw new Error('--url requires --file.');
         const { text } = await readExport(values.file);
-        console.log(syncLink(text, randomUUID()));
+        const token = process.env.COCWIDGET_TOKEN;
+        if (!token || !/^[a-f0-9]{64}$/.test(token)) throw new Error('Set COCWIDGET_TOKEN to the pairing code from the app.');
+        console.log(syncLink(text, randomUUID(), false, token));
       } else {
         if (!values.device) throw new Error('Specify --device SERIAL (find it with adb devices).');
         const device = new AndroidDevice(values.device, values.adb);

@@ -19,6 +19,7 @@ function harness(options: { enabled?: boolean; publish?: () => Promise<{ availab
   const events: string[] = [], reports: SyncResult[] = [];
   const coordinator = new SyncCoordinator({
     enabled: () => options.enabled ?? true,
+    authorize: () => true,
     now: () => now,
     commit: async mutate => { const value = mutate(workspace); events.push('save'); workspace = value; return workspace; },
     publish: async () => { events.push('publish'); return options.publish ? options.publish() : { available: true }; },

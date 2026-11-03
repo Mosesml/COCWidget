@@ -5,7 +5,7 @@ Android first. This product has three distinct stages: producing a fresh game ex
 ## Android setup
 
 1. Install the native COCWidget app (`npm run android` for a development build).
-2. Open it once and enable **Automatic imports**. This allows valid sync requests to save and refresh without a Save prompt.
+2. Open it once, enable **Automatic imports**, and tap **Copy automation pairing code**. Set `COCWIDGET_TOKEN` in your host environment to that code. Keep it private; resetting pairing in the app revokes old codes. Valid paired requests save and refresh without a Save prompt. Updating from an older build requires this one-time pairing step.
 3. Enable Android USB debugging, connect the device and find its serial with `adb devices`. Node 22 and Android platform-tools must be available on the host; `--adb /absolute/path/to/adb` overrides the binary.
 4. Import once, then add COCWidget from your launcher's widget picker. Each installed widget selects its own village or overview.
 
@@ -56,6 +56,6 @@ The script requires the host to keep running and the connected Android device to
 
 The Android ADB transport does not deliver directly to an iPhone. The retained iOS receiver/widget code needs native compilation and device tests.
 
-Planned Shortcut: **Get Clipboard → URL Encode → Open URLs**, using `cocwidget://sync?data=` followed by encoded text. With Automatic imports enabled, a valid request saves and publishes without an app Save prompt. An App/Is Closed personal automation can trigger that handoff when leaving Clash. It still needs a fresh export in the clipboard; that event does not make the game export JSON. An App Intent/share extension is tracked separately in the PRD.
+Native Shortcut: **Get Clipboard → URL Encode → Open URLs**, using `cocwidget://sync?token=YOUR_PAIRING_CODE&data=` followed by encoded text. With Automatic imports enabled and the correct pairing code, a valid request saves and publishes without an app Save prompt. An App/Is Closed personal automation can trigger that handoff when leaving Clash. It still needs a fresh export in the clipboard; that event does not make the game export JSON. An App Intent/share extension is tracked separately in the PRD.
 
 Sources: [Android clipboard restrictions](https://developer.android.com/privacy-and-security/risks/secure-clipboard-handling), [Apple app trigger behavior](https://support.apple.com/en-tm/guide/shortcuts/apde31e9638b/ios), [Apple automatic shortcut triggers](https://support.apple.com/en-euro/guide/shortcuts/apdfbdbd7123/10.0/ios/27).

@@ -1,5 +1,5 @@
 import { currentSnapshot } from './catalogue';
-import { parseExport } from './import';
+import { parseExport, stable, utf8Length } from './import';
 import type { Account, Preferences, Snapshot, Workspace } from './types';
 
 export const defaults = (builders = 6): Preferences => ({ goal: 'army', armyId: 'dragons', builders,
@@ -12,7 +12,7 @@ export function acceptSnapshot(workspace: Workspace, snapshot: Snapshot, name?: 
   if (existing) {
     const current = currentSnapshot(existing);
     if (snapshot.exportedAt < current.exportedAt) throw new Error('This export is older than the saved snapshot. Keep your newer data.');
-    if (JSON.stringify(snapshot.raw) === JSON.stringify(current.raw) || snapshot.id === current.id) throw new Error('This exact snapshot is already saved.');
+    if (stable(snapshot.raw) === stable(current.raw)) throw new Error('This exact snapshot is already saved.');
     if (snapshot.exportedAt === current.exportedAt) throw new Error('A different snapshot already exists at this timestamp. Export fresh data from the game.');
   }
   const account: Account = existing ? { ...existing, name: name?.trim() || existing.name,
@@ -33,11 +33,11 @@ export function encodeBackup(workspace: Workspace) {
     snapshots: account.snapshots.map(snapshot => ({ raw: snapshot.raw, importedAt: snapshot.importedAt })),
   })) };
   const text = JSON.stringify({ format: 'cocwidget-backup', version: 1, workspace: compact }, null, 2);
-  if (text.length > 20_000_000) throw new Error('This workspace exceeds the 20 MB backup limit. Export older villages separately before adding more history.');
+  if (text.length > 20_000_000 || utf8Length(text) > 20_000_000) throw new Error('This workspace exceeds the 20 MB backup limit. Export older villages separately before adding more history.');
   return text;
 }
 export function decodeBackup(text: string, now = Date.now()): Workspace {
-  if (text.length > 20_000_000) throw new Error('Backup exceeds the 20 MB limit.');
+  if (text.length > 20_000_000 || utf8Length(text) > 20_000_000) throw new Error('Backup exceeds the 20 MB limit.');
   const backup = JSON.parse(text);
   if (backup?.format !== 'cocwidget-backup' || backup.version !== 1 || !Array.isArray(backup.workspace?.accounts)) throw new Error('This is not a supported COCWidget backup.');
   if (backup.workspace.accounts.length > 25) throw new Error('A backup can contain up to 25 villages.');

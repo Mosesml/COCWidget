@@ -39,6 +39,12 @@ Current priority from Moses: **widget + working automatic refresh, Android first
 
 ## Release work
 
+- [x] Audit import authorization; require revocable private automation pairing codes.
+- [x] Bound unknown JSON depth/size, native file reads, timer payloads and repeated widget timelines.
+- [x] Validate widget ownership and delivery acknowledgements; serialize backup restoration.
+- [x] Patch the two vulnerable build-tool dependencies; npm installation reports zero advisories.
+- [ ] Finish monochrome widget layouts, Android accessibility checks and iPhone setup investigation.
+
 - [ ] Current live-game catalogue, special-operation and boost audit.
 - [ ] Alternate launchers, resize/rotation, larger text, DST, Doze and long-running device checks.
 - [ ] Phone-only export automation feasibility; the current Android menu runner uses an unlocked ADB-connected device and a host.

@@ -3,6 +3,7 @@ package com.mosesml.cocwidget.bridge
 import android.app.Activity
 import android.appwidget.AppWidgetManager
 import android.content.Intent
+import android.content.ComponentName
 import android.graphics.Color
 import android.os.Bundle
 import android.widget.Button
@@ -16,6 +17,8 @@ class WidgetConfigurationActivity : Activity() {
     setResult(RESULT_CANCELED)
     val id = intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, AppWidgetManager.INVALID_APPWIDGET_ID)
     if (id == AppWidgetManager.INVALID_APPWIDGET_ID) { finish(); return }
+    val info = AppWidgetManager.getInstance(this).getAppWidgetInfo(id)
+    if (info?.provider != ComponentName(this, VillageWidgetProvider::class.java)) { finish(); return }
     val root = LinearLayout(this).apply {
       orientation = LinearLayout.VERTICAL
       setPadding(40, 64, 40, 40)
@@ -34,7 +37,7 @@ class WidgetConfigurationActivity : Activity() {
       root.addView(Button(this).apply {
         text = name; isAllCaps = false; minHeight = 64
         setOnClickListener {
-          VillageWidgetProvider.preferences(this@WidgetConfigurationActivity).edit().putString("widget:$id:tag", tag).commit()
+          if (!VillageWidgetProvider.preferences(this@WidgetConfigurationActivity).edit().putString("widget:$id:tag", tag).commit()) return@setOnClickListener
           VillageWidgetProvider.update(this@WidgetConfigurationActivity, AppWidgetManager.getInstance(this@WidgetConfigurationActivity), id)
           setResult(RESULT_OK, Intent().putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, id))
           finish()

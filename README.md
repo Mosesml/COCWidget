@@ -18,7 +18,7 @@ Open COCWidget once and enable **Automatic imports**. Add its home-screen widget
 
 ## Send or watch existing exports
 
-Enable USB debugging and find your device with `adb devices`:
+Enable USB debugging and find your device with `adb devices`. In COCWidget, enable Automatic imports, copy the automation pairing code, and set `COCWIDGET_TOKEN` to that private code in the host environment:
 
 ```sh
 npm run sync -- --device SERIAL --file village.json

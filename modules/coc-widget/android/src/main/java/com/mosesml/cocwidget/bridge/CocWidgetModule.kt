@@ -32,8 +32,21 @@ class CocWidgetModule : Module() {
       val context = appContext.reactContext ?: throw IllegalStateException("Application is not ready")
       val directory = context.getExternalFilesDir("imports") ?: throw IllegalStateException("Import storage is unavailable")
       val file = File(directory, "$requestId.json")
+      require(file.canonicalFile == File(directory.canonicalFile, "$requestId.json")) { "Import symlinks are not supported" }
       require(file.isFile && file.length() <= 1_000_000) { "Export file is missing or too large" }
-      try { file.readText(Charsets.UTF_8) } finally { file.delete() }
+      try {
+        file.inputStream().use { stream ->
+          val output = java.io.ByteArrayOutputStream()
+          val buffer = ByteArray(8192)
+          while (true) {
+            val count = stream.read(buffer)
+            if (count < 0) break
+            require(output.size() + count <= 1_000_000) { "Export file is too large" }
+            output.write(buffer, 0, count)
+          }
+          Charsets.UTF_8.newDecoder().decode(java.nio.ByteBuffer.wrap(output.toByteArray())).toString()
+        }
+      } finally { file.delete() }
     }
     AsyncFunction("moveToBackground") {
       appContext.currentActivity?.let { activity -> activity.runOnUiThread { activity.moveTaskToBack(true) } }

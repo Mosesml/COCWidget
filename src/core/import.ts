@@ -19,10 +19,29 @@ function integerField(row: JsonObject, name: string, min: number, max: number, p
   if (!whole(value, min) || value > max) throw new Error(`${path}.${name} must be a whole number between ${min} and ${max}.`);
   return value;
 }
-function stable(value: Json): string {
+export function stable(value: Json): string {
   if (Array.isArray(value)) return `[${value.map(stable).join(',')}]`;
   if (isObject(value)) return `{${Object.keys(value).sort().map(k => `${JSON.stringify(k)}:${stable(value[k]!)}`).join(',')}}`;
   return JSON.stringify(value);
+}
+/** Bound the entire JSON tree, including fields that future game versions add. */
+export function validateJsonTree(value: unknown) {
+  const pending = [{ value, depth: 0 }];
+  let nodes = 0;
+  while (pending.length) {
+    const entry = pending.pop()!;
+    if (++nodes > 50_000 || entry.depth > 32) throw new Error('Export JSON is too complex (maximum depth 32 and 50,000 values).');
+    if (typeof entry.value === 'number' && !Number.isFinite(entry.value)) throw new Error('Export contains an invalid number.');
+    if (entry.value && typeof entry.value === 'object') {
+      for (const child of Object.values(entry.value)) pending.push({ value: child, depth: entry.depth + 1 });
+    }
+  }
+}
+export function utf8Length(text: string) {
+  // Works in React Native and the isolated iPhone JavaScript runtime too.
+  let bytes = 0;
+  for (const char of text) { const code = char.codePointAt(0)!; bytes += code <= 0x7f ? 1 : code <= 0x7ff ? 2 : code <= 0xffff ? 3 : 4; }
+  return bytes;
 }
 export function fingerprint(value: Json): string {
   let hash = 2166136261;
@@ -31,9 +50,10 @@ export function fingerprint(value: Json): string {
 }
 
 export function parseExport(text: string, now = Date.now()): Snapshot {
-  if (text.length > 1_000_000) throw new Error('This export is too large. The limit is 1 MB.');
+  if (text.length > 1_000_000 || utf8Length(text) > 1_000_000) throw new Error('This export is too large. The limit is 1 MB.');
   let raw: unknown;
   try { raw = JSON.parse(text); } catch { throw new Error('That is not valid JSON. Copy the complete village export from the game.'); }
+  validateJsonTree(raw);
   if (!isObject(raw)) throw new Error('Paste a single village export object.');
   if (typeof raw.tag !== 'string' || !/^#[A-Z0-9]{3,20}$/i.test(raw.tag)) throw new Error('The export needs a valid player tag.');
   if (!whole(raw.timestamp, 946684800) || raw.timestamp > 4102444800) throw new Error('The export needs a valid timestamp in seconds.');
@@ -50,7 +70,7 @@ export function parseExport(text: string, now = Date.now()): Snapshot {
   const seenSections: string[] = [];
   const unknown = new Set<number>();
   const visit = (value: Json, section: string, path: string, kind: Kind, village: Village, parentKey?: string) => {
-    if (entities.length > 10_000) throw new Error('Too many inventory entries.');
+    if (entities.length >= 10_000) throw new Error('Too many inventory entries.');
     if (Array.isArray(value)) { value.forEach((row, index) => visit(row, section, `${path}[${index}]`, kind, village, parentKey)); return; }
     if (whole(value, 1)) value = { data: value };
     if (!isObject(value)) throw new Error(`${path} must be an inventory object or ID.`);
@@ -74,7 +94,7 @@ export function parseExport(text: string, now = Date.now()): Snapshot {
     }
   };
   for (const [section, value] of Object.entries(raw)) {
-    if (!sections[section]) {
+    if (!Object.hasOwn(sections, section)) {
       if (Array.isArray(value) && value.some(row => isObject(row) && whole(row.data, 1))) {
         seenSections.push(section); visit(value, section, section, 'unknown', 'shared');
         warnings.push(`New inventory section ${section} was preserved. Its worker rules are unknown.`);
@@ -86,6 +106,7 @@ export function parseExport(text: string, now = Date.now()): Snapshot {
     visit(value, section, section, kind, village);
   }
   const levelOf = (id: number) => Math.max(0, ...entities.filter(e => e.id === id).map(e => e.level ?? 0));
+  if (entities.filter(entity => entity.timer !== undefined).length > 64) throw new Error('An export can contain at most 64 active timer entries.');
   if (!levelOf(1000001)) throw new Error('No Town Hall was found in buildings. Copy the complete village export.');
   const huts = entities.filter(e => e.id === 1000015).reduce((n, e) => n + e.count, 0);
   const bob = entities.some(e => e.id === 1000064) || levelOf(1000065) >= 5 ? 1 : 0;

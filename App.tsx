@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { ActivityIndicator, Alert, AppState, Button, Linking, Platform, ScrollView, StyleSheet, Switch, Text, TextInput, View } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Clipboard from 'expo-clipboard';
+import * as Crypto from 'expo-crypto';
 import * as DocumentPicker from 'expo-document-picker';
 import { File, Paths } from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
@@ -14,7 +15,8 @@ import { parseSyncLink, SyncCoordinator, type SyncRequest, type SyncResult } fro
 import { decodeBackup, deleteAccount, emptyWorkspace, encodeBackup } from './src/core/workspace';
 import { publishWidgets } from './src/widgets/publish';
 
-const automationKey = '@cocwidget/automation-v1', resultKey = '@cocwidget/last-sync-v1';
+const automationKey = '@cocwidget/automation-v1', resultKey = '@cocwidget/last-sync-v1', tokenKey = '@cocwidget/pairing-v1';
+const makeToken = async () => Array.from(await Crypto.getRandomBytesAsync(32), byte => byte.toString(16).padStart(2, '0')).join('');
 const delay = (milliseconds: number) => new Promise(resolve => setTimeout(resolve, milliseconds));
 async function clipboardText() {
   // Android permits reads only after our Activity has focus. A cold launch can precede that.
@@ -33,27 +35,32 @@ export default function App() {
 function WidgetSetup() {
   const store = useWorkspace();
   const [enabled, setEnabled] = useState(false), enabledRef = useRef(false);
+  const tokenRef = useRef('');
   const [settingsReady, setSettingsReady] = useState(false), [last, setLast] = useState<SyncResult | null>(null);
   const [message, setMessage] = useState(''), [input, setInput] = useState(''), [busy, setBusy] = useState(false);
   const [inbox, setInbox] = useState<SyncRequest[]>([]), processing = useRef(false), published = useRef(false);
+  const pendingCount = useRef(0);
   const [fixture, setFixture] = useState<number | null>(null);
   useEffect(() => {
-    void Promise.all([AsyncStorage.getItem(automationKey), AsyncStorage.getItem(resultKey)]).then(([setting, previous]) => {
+    void Promise.all([AsyncStorage.getItem(automationKey), AsyncStorage.getItem(resultKey), AsyncStorage.getItem(tokenKey)]).then(async ([setting, previous, storedToken]) => {
+      const token = storedToken && /^[a-f0-9]{64}$/.test(storedToken) ? storedToken : await makeToken();
+      await AsyncStorage.setItem(tokenKey, token); tokenRef.current = token;
       const value = setting === 'true'; enabledRef.current = value; setEnabled(value);
-      if (previous) { try { setLast(JSON.parse(previous)); } catch {} }
+      if (previous) { try { const result = JSON.parse(previous); if (typeof result?.completedAt === 'number' && typeof result?.widgetUpdated === 'boolean') setLast(result); } catch {} }
     }).catch(() => setMessage('Automation settings could not be read. Enable imports again to continue.'))
       .finally(() => setSettingsReady(true));
   }, []);
   const service = useMemo(() => new SyncCoordinator({
     enabled: () => enabledRef.current,
+    authorize: request => !!tokenRef.current && request.token === tokenRef.current,
     commit: store.commit,
     publish: publishWidgets,
     clipboard: clipboardText,
     readFile: readIncomingExport,
     report: async result => {
       setLast(result);
-      await AsyncStorage.setItem(resultKey, JSON.stringify(result));
-      await reportNativeSync(result);
+      try { await AsyncStorage.setItem(resultKey, JSON.stringify(result)); }
+      finally { await reportNativeSync(result); }
     },
   }), [store.commit]);
   useEffect(() => {
@@ -61,10 +68,16 @@ function WidgetSetup() {
       try {
         if (__DEV__ && link.startsWith('cocwidget://test-export')) { setFixture(0); return; }
         const request = parseSyncLink(link);
-        if (request) { setFixture(null); setInbox(pending => [...pending.slice(-49), request]); }
+        if (request) {
+          if (pendingCount.current >= 10) {
+            void reportNativeSync({ requestId: request.requestId, status: 'failed', widgetUpdated: false, completedAt: Date.now(), message: 'Import queue is full. Retry later.' }).catch(() => {});
+            return;
+          }
+          pendingCount.current++; setFixture(null); setInbox(pending => [...pending, request]);
+        }
       } catch (error) { setMessage((error as Error).message); }
     };
-    void Linking.getInitialURL().then(link => { if (link) receive(link); });
+    void Linking.getInitialURL().then(link => { if (link) receive(link); }).catch(error => setMessage(error.message));
     const listener = Linking.addEventListener('url', event => receive(event.url));
     return () => listener.remove();
   }, []);
@@ -76,7 +89,7 @@ function WidgetSetup() {
   useEffect(() => {
     if (!store.workspace || !settingsReady || processing.current || !inbox.length) return;
     const request = inbox[0]!;
-    processing.current = true; setBusy(true); setInbox(pending => pending.slice(1));
+    processing.current = true; pendingCount.current--; setBusy(true); setInbox(pending => pending.slice(1));
     void service.receive(request).then(async result => {
       if (request.background && result.widgetUpdated) await returnToBackground();
     }).catch(error => setMessage(error.message)).finally(() => {
@@ -84,7 +97,10 @@ function WidgetSetup() {
     });
   }, [inbox, store.workspace, settingsReady, service]);
   const toggle = async (value: boolean) => {
-    try { await AsyncStorage.setItem(automationKey, String(value)); enabledRef.current = value; setEnabled(value); }
+    try {
+      if (value && !tokenRef.current) throw new Error('Pairing settings are unavailable. Restart the app.');
+      await AsyncStorage.setItem(automationKey, String(value)); enabledRef.current = value; setEnabled(value);
+    }
     catch { setMessage('Could not save the automation setting.'); }
   };
   const manual = async (text?: string) => {
@@ -106,7 +122,7 @@ function WidgetSetup() {
         const value = decodeBackup(text);
         Alert.alert('Replace saved villages?', 'This restores the selected backup on this device.', [
           { text: 'Cancel', style: 'cancel' }, { text: 'Restore', onPress: () => {
-            void store.replace(value).then(() => service.refresh()).catch(error => setMessage(error.message));
+            void service.update(() => value).catch(error => setMessage(error.message));
           } },
         ]);
       } else await manual(text);
@@ -143,6 +159,8 @@ function WidgetSetup() {
       <View style={styles.section}>
         <View style={styles.row}><View style={{ flex: 1 }}><Text style={styles.heading}>Automatic imports</Text><Text style={styles.body}>Accept JSON from your Shortcut or sync script and refresh widgets without a Save prompt.</Text></View><Switch accessibilityLabel="Automatic imports" disabled={!!store.error} value={enabled} onValueChange={value => void toggle(value)} /></View>
         <Text style={styles.body}>This accepts available exports. A fresh export must still come from Clash or a configured Android export-menu script.</Text>
+        <Button title="Copy automation pairing code" disabled={!enabled} onPress={() => void Clipboard.setStringAsync(tokenRef.current).then(() => setMessage('Pairing code copied. Use it in your script or Shortcut.'))} />
+        <Button title="Reset automation pairing" disabled={!enabled || busy} onPress={() => Alert.alert('Reset pairing?', 'Existing scripts and Shortcuts will need the new code.', [{ text: 'Cancel', style: 'cancel' }, { text: 'Reset', onPress: () => { void makeToken().then(async token => { await AsyncStorage.setItem(tokenKey, token); tokenRef.current = token; setMessage('Pairing reset. Copy the new code to your scripts.'); }).catch(error => setMessage(error.message)); } }])} />
         {busy && <ActivityIndicator accessibilityLabel="Syncing widget" />}
         {last && <View accessibilityLiveRegion="polite"><Text style={styles.heading}>{last.widgetUpdated ? last.status === 'updated' ? 'Widget data updated' : last.status === 'ignored_older' ? 'Older export ignored' : 'Already current · widgets refreshed' : 'Sync needs attention'}</Text><Text style={styles.body}>{last.message ?? `${last.tag} · Exported ${new Date(last.exportedAt!).toLocaleString()}`}</Text><Text style={styles.small}>Last attempt: {new Date(last.completedAt).toLocaleString()}</Text></View>}
         {!!message && <Text accessibilityRole="alert" style={styles.error}>{message}</Text>}
