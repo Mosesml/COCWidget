@@ -69,7 +69,9 @@ script, USB debugging and an unlocked device. Ctrl+C stops it.`);
   do {
     if (stop.signal.aborted) break;
     console.log('Exporting village data…');
-    const result = await exporter.export(profile, stop.signal);
+    let result;
+    try { result = await exporter.export(profile, stop.signal); }
+    catch (error) { if (stop.signal.aborted) break; throw error; }
     console.log(`${result.status}: ${result.tag} · fresh export saved and widget acknowledged`);
     if (!interval || stop.signal.aborted) break;
     console.log(`Next export in ${interval} seconds.`);

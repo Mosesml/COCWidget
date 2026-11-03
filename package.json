@@ -24,11 +24,12 @@
     "test": "node --import tsx --test tests/*.test.ts",
     "build:android": "expo export --platform android --output-dir native-bundles/android",
     "build:ios": "expo export --platform ios --output-dir native-bundles/ios",
-    "check": "npm run typecheck && npm test && npm run build:android && npm run build:ios",
+    "check": "npm run typecheck && npm run build:scriptable && npm test && npm run build:android && npm run build:ios",
     "data:sync": "node scripts/sync-catalogue.mjs",
     "sync": "node --import tsx scripts/sync-village.ts",
     "export:android": "node --import tsx scripts/export-android.ts",
-    "check:widget-layout": "node node_modules/expo-widgets/scripts/build-layout-registry.mjs . ios .expo/widget-layout.json"
+    "check:widget-layout": "node node_modules/expo-widgets/scripts/build-layout-registry.mjs . ios .expo/widget-layout.json && node scripts/check-ios-widget-runtime.mjs",
+    "build:scriptable": "node scripts/build-scriptable.mjs"
   },
   "dependencies": {
     "@expo/ui": "~58.0.26",
@@ -51,6 +52,7 @@
   "devDependencies": {
     "@types/node": "^22.0.0",
     "@types/react": "~19.3.0",
+    "esbuild": "0.28.2",
     "tsx": "^4.21.0",
     "typescript": "~6.0.3"
   },

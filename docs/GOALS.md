@@ -24,10 +24,13 @@ Current priority from Moses: **widget + working automatic refresh, Android first
 ## iOS phase (retained in PRD)
 
 - [x] Shared receiver logic, SwiftUI layout and App Group publisher source.
-- [ ] Full Xcode app/extension compilation.
+- [x] Native app/extension compilation on GitHub macOS/Xcode CI (unsigned simulator build).
 - [ ] Actual iPhone Shortcut import/update and per-widget account tests.
-- [ ] Background-capable App Intent/share delivery investigation.
-- [ ] Document the fresh-export source available on iOS; app-close automation alone is not an export.
+- [x] Investigate App Intent/share delivery, Scriptable and developer-rig iPhone automation; document implementation requirements.
+- [x] Build a standalone Scriptable widget with shared parser/catalogue and Shortcut JSON input.
+- [x] Exercise the generated Scriptable artifact against a simulated API and 42 native iOS SDK runtime layout states.
+- [ ] Physical iPhone test for Scriptable imports, local storage, selected villages and refresh.
+- [x] Document copied game JSON as the current iOS source; app-close automation alone is not an export.
 
 ## Foundation retained
 
@@ -43,7 +46,10 @@ Current priority from Moses: **widget + working automatic refresh, Android first
 - [x] Bound unknown JSON depth/size, native file reads, timer payloads and repeated widget timelines.
 - [x] Validate widget ownership and delivery acknowledgements; serialize backup restoration.
 - [x] Patch the two vulnerable build-tool dependencies; npm installation reports zero advisories.
-- [ ] Finish monochrome widget layouts, Android accessibility checks and iPhone setup investigation.
+- [x] Monochrome native widget layouts; launcher rendering and 200% text checks on API 34.
+- [x] Fix the unsupported RemoteViews divider found by actual host testing and add a framework restriction regression.
+- [x] Document iPhone setup, alternatives and the Android version/ABI/launcher support boundary.
+- [x] Native iOS app and widget compile on hosted macOS/Xcode; physical iPhone checks remain open.
 
 - [ ] Current live-game catalogue, special-operation and boost audit.
 - [ ] Alternate launchers, resize/rotation, larger text, DST, Doze and long-running device checks.
@@ -58,3 +64,5 @@ Current priority from Moses: **widget + working automatic refresh, Android first
 - Android device checkpoint: file delivery and the atomic-file watcher update an installed widget without a Save prompt, after one-time enablement. The calibrated synthetic export sequence produces fresh clipboard JSON and receives a native widget acknowledgement. The Android 14 focus query was corrected from actual device output. Debug and standalone APK compilation pass. Live Clash calibration remains open.
 
 - Final Android check: the repeated synthetic export loop completed two unattended 60-second cycles. The standalone APK then accepted a 307,618-byte export with Metro stopped and the companion initially force-stopped; an installed widget showed the updated timer. No website is required. Live Clash device calibration and iOS device work remain open.
+
+- Audit checkpoint: private pairing gate tested in the standalone Android app, 35 automated tests pass, 42 isolated iOS SDK layout states pass, and native iOS compilation succeeds at `4eabfa0`. Android CI setup was found to request obsolete SDK `tools`; explicit SDK packages replace that default. Scriptable uses the same parser and preserves one full latest export per village; its physical iPhone integration is unverified.

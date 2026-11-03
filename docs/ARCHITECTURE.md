@@ -1,6 +1,6 @@
 # Architecture
 
-The product is a native Android widget with a small Expo/React Native setup utility and host-side automation scripts. iOS widget source is retained for the next platform phase. There is no website or browser target.
+The product is a native Android widget with a small Expo/React Native setup utility and host-side automation scripts. Native iOS and an optional Scriptable iPhone integration share its domain layer. There is no website or browser target.
 
 ## Delivery path
 
@@ -12,7 +12,7 @@ The product is a native Android widget with a small Expo/React Native setup util
 
 ## Android transport
 
-`scripts/sync-village.ts` validates a file and transfers it to the app-specific external imports directory using ADB. The launch URL contains only a bounded request ID. `CocWidgetModule.readIncomingExport` restricts filenames and size, reads the file and removes it. The app validates/saves and calls the widget bridge before logging a small result with that ID. No raw export/clipboard content is written to the acknowledgement log.
+`scripts/sync-village.ts` validates a file and transfers it to the app-specific external imports directory using ADB. The launch URL contains a bounded request ID and private pairing token. `CocWidgetModule.readIncomingExport` restricts filenames and size, reads the file and removes it. The app validates/saves and calls the widget bridge before logging a small result with that ID. No raw export/clipboard content is written to the acknowledgement log.
 
 The runner starts listening before launching the receiver. It reports success only after acknowledgement. `scripts/lib/watch.ts` polls files/directories so atomic rename is supported; delivery failures remain eligible for retry.
 
@@ -25,3 +25,9 @@ The development-only `cocwidget://test-export` source simulates Settings/Copy wi
 `src/core/widgets.ts` emits small projections, with saved source time distinct from generated forecast time. Android RemoteViews use native Chronometers, per-AppWidget-ID configuration and best-effort inexact boundary refresh. Separate portrait/landscape views bound visible row counts. iOS uses an isolated SwiftUI layout, App Group data and bounded/coalesced WidgetKit timelines.
 
 The remaining `src/core/` modules retain parsing, catalogue, boost timing, strategy, equipment and history logic. Raw exports remain the source of truth. See DATA_MODEL.md for assumptions, THIRD_PARTY.md for catalogue/fixture notices, and VALIDATION.md for actual checked platform behavior.
+
+## Optional iPhone Scriptable integration
+
+`integrations/scriptable/src/core.ts` bundles the shared parser, timing, strategy and widget projection into a standalone Scriptable script. Its adapter receives explicit Shortcut input, preserves one complete latest export per village in local Library storage, and writes a separate small projection cache for widget reads. Temporary-file moves replace complete files. A failed cache write can be repaired by retrying the same export; no saved acknowledgement is returned before both writes complete. Scriptable storage is independent of the native app.
+
+Widgets never read the clipboard. Running the script interactively offers an explicit clipboard import action. A Shortcut import returns a saved result, while iOS retains control of widget refresh timing. The Scriptable widget uses absolute finish times to avoid an expired timer counting upward. Native WidgetKit uses bounded countdown intervals. No network requests or remote code downloads occur in the Scriptable integration.

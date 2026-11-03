@@ -7,13 +7,15 @@ Current work removes the website and prioritizes Android. Historical browser che
 | Check | Outcome |
 | --- | --- |
 | TypeScript | Pass. |
-| Domain/automation tests | 25 pass, including serialized save/publish/ack, idempotence, failed publication retry, fresh/wrong-village guards, atomic-file watch and profile validation. |
+| Domain/automation/platform tests | 35 pass, including paired authorization, size/depth limits, cancellation, file bounds, generated Scriptable execution and RemoteViews class restrictions. |
 | Native JavaScript exports | Android and iOS exports pass after the website removal. |
 | Updated Android native compilation | Pass: debug build and standalone ARM64 release preview (development signing key). Standalone receiver also tested with Metro stopped. |
 | Updated automatic file/clipboard receiver on emulator | Pass: enablement gate, file delivery, cold receiver start, atomic-file watcher and installed-widget update without a Save prompt. |
 | Export-menu runner using synthetic development source | Pass: interactive calibration, Settings/More Settings/Copy/menu cleanup, fresh clipboard validation and native widget acknowledgement. |
 | Export-menu calibration against real Clash client | Not verified; no live client/device profile has been established here. |
-| Full iOS compilation/device testing | Not verified; deferred to the iOS phase. |
+| Native iOS compilation | Pass: app and widget compile unsigned for simulator on GitHub macOS/Xcode, commit `4eabfa0`. Physical installation/behavior remains unverified. |
+| Isolated iOS widget SDK runtime | 42 states pass: three sizes, full-color/accented, overview/selected/removed villages, active/expired timers and empty state. |
+| Scriptable iPhone alternative | Bundle generation and simulated API execution pass. No physical iPhone claim. |
 
 ## Prior native widget observations
 
@@ -45,3 +47,15 @@ The release-preview APK was installed over the debug app. The file watcher and n
 The test emulator has no installed `com.supercell.clashofclans` package. Live-game menu calibration and long-running behavior on a real user's unlocked device remain unverified. The synthetic source is guarded by `__DEV__`; release behavior does not expose it.
 
 ![Standalone widget after automatic file delivery](screenshots/android-auto-watch.png)
+
+## November 3 audit and monochrome design
+
+The rebuilt standalone app was installed on the API 34 emulator. A real CLI import with a wrong pairing code failed; the correct private code saved the export and received a native publication acknowledgement, with Metro stopped. Actual Home Screen placement exercised the owned-widget configuration check. The first design build exposed an unsupported plain `View` divider: native compilation passed but the launcher could not inflate the widget. Replacing it with `TextView` fixed rendering; the final APK was reinstalled and the actual widget inspected. A platform restriction regression now covers this failure. This also illustrates why publication acknowledgement alone cannot prove a launcher rendered a widget.
+
+The corrected black/white widget displays village identity, expected builders, two countdowns, absolute finish times, next upgrade and export freshness. At 200% system text scaling it reduces to one timer, ellipsizes long text and hides secondary metadata; the footer can truncate. System font size was restored afterward. Arbitrary launcher sizes, rotation, full TalkBack navigation and physical OEM behavior remain unverified. Attempts to resize did not establish a separate compact size, so the screenshots are not evidence of minimum-height rendering.
+
+The iOS job [compiled the app and extension successfully](https://github.com/Mosesml/COCWidget/actions/runs/41590410789/job/125765593709). The Android job in that first run failed before compilation because setup-android requested the obsolete `tools` SDK package. Its configuration now requests platform-tools, API 37, build-tools 37 and the pinned NDK explicitly. Local release/debug Android compilation passes.
+
+![Monochrome Android widget](screenshots/android-monochrome.png)
+
+![Android widget at 200 percent text size](screenshots/android-large-text.png)

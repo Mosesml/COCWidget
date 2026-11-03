@@ -7,7 +7,13 @@ import { join } from 'node:path';
 import type { SyncResult } from '../../src/core/sync';
 
 const exec = promisify(execFile);
-export const wait = (milliseconds: number) => new Promise(resolve => setTimeout(resolve, milliseconds));
+export const wait = (milliseconds: number, signal?: AbortSignal) => new Promise<void>((resolve, reject) => {
+  const done = () => { clearTimeout(timer); signal?.removeEventListener('abort', aborted); resolve(); };
+  const aborted = () => { clearTimeout(timer); signal?.removeEventListener('abort', aborted); reject(new Error('Export stopped.')); };
+  const timer = setTimeout(done, milliseconds);
+  signal?.addEventListener('abort', aborted, { once: true });
+  if (signal?.aborted) aborted();
+});
 export class AndroidDevice {
   constructor(readonly serial: string, readonly adb = process.env.ADB ?? 'adb', readonly token = process.env.COCWIDGET_TOKEN) {
     if (!/^[A-Za-z0-9_.:-]{1,100}$/.test(serial)) throw new Error('Specify a valid Android device serial.');

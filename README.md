@@ -2,7 +2,7 @@
 
 **Android home-screen widgets and automatic village JSON delivery.** No website. The small native companion configures imports, stores villages and publishes widget data.
 
-Android is the first delivery target. iOS widget source is retained; its device integration is the next phase in [the PRD](docs/PRD.md).
+Android is the first delivery target. Native iOS app/widget compilation now passes on macOS CI. An optional standalone Scriptable iPhone widget is also implemented; both iPhone paths still need physical-device verification. See [iPhone setup](docs/IOS_SETUP.md) and [compatibility](docs/COMPATIBILITY.md).
 
 ## Run the Android app
 
@@ -60,6 +60,8 @@ npm run check                 # TypeScript, domain/automation tests, native JS b
 npm run check:widget-layout   # isolated iOS layout registry (after iOS prebuild)
 ```
 
+- [iPhone setup and alternatives](docs/IOS_SETUP.md)
+- [Android/iOS compatibility](docs/COMPATIBILITY.md)
 - [PRD and platform roadmap](docs/PRD.md)
 - [Goals/checkpoints](docs/GOALS.md)
 - [Validation record](docs/VALIDATION.md) — includes actual emulator, repeated synthetic export and standalone large-file checks
