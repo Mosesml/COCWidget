@@ -66,6 +66,7 @@ export interface SyncDependencies {
   enabled: () => boolean;
   authorize: (request: SyncRequest) => boolean;
   commit: (mutate: (workspace: Workspace) => Workspace) => Promise<Workspace>;
+  replace?: (workspace: Workspace) => Promise<Workspace>;
   publish: (projection: WidgetProjection) => Promise<{ available: boolean }>;
   clipboard: () => Promise<string>;
   readFile?: (requestId: string) => Promise<string>;
@@ -121,4 +122,12 @@ export class SyncCoordinator {
     });
   }
   refresh() { return this.update(workspace => workspace); }
+  replace(workspace: Workspace) {
+    return this.enqueue(async () => {
+      const saved = this.dependencies.replace ? await this.dependencies.replace(workspace) : await this.dependencies.commit(() => workspace);
+      const publication = await this.dependencies.publish(widgetProjection(saved, this.dependencies.now?.() ?? Date.now()));
+      if (!publication.available) throw new Error('Install a native build to update home-screen widgets.');
+      return saved;
+    });
+  }
 }

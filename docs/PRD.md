@@ -8,7 +8,7 @@ A player sees useful village countdowns, expected builder availability, next upg
 
 ## Android first release
 
-1. Preserve and validate complete exports, including counted inventory, nested modules, unknown IDs and raw fields. Retain separate village histories/preferences.
+1. Preserve and validate complete exports, including counted inventory, nested modules, unknown IDs and raw fields. Retain separate village histories/preferences. Persist full workspaces in app-private file generations with a committed pointer; migrate readable legacy data and recover unreadable workspaces through explicit backup restoration.
 2. Native widget account configuration stays independent of imports and app account selection. Countdowns and estimated boundary changes work without a React screen running. Show absolute deadlines and source export age.
 3. One-time Automatic imports setting plus revocable private pairing code. Only paired links/files/clipboard requests save and publish automatically; unpaired requests cannot read the clipboard or file. Manual import remains available for recovery.
 4. File delivery handles the supported 1 MB size without an oversized shell URL. A request ID ties success to an acknowledgement after native publication. A lost acknowledgement can be retried idempotently.

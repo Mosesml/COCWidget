@@ -33,7 +33,10 @@ export function validateJsonTree(value: unknown) {
     if (++nodes > 50_000 || entry.depth > 32) throw new Error('Export JSON is too complex (maximum depth 32 and 50,000 values).');
     if (typeof entry.value === 'number' && !Number.isFinite(entry.value)) throw new Error('Export contains an invalid number.');
     if (entry.value && typeof entry.value === 'object') {
-      for (const child of Object.values(entry.value)) pending.push({ value: child, depth: entry.depth + 1 });
+      for (const child of Object.values(entry.value)) {
+        if (pending.length + nodes >= 50_000) throw new Error('Export JSON is too complex (maximum depth 32 and 50,000 values).');
+        pending.push({ value: child, depth: entry.depth + 1 });
+      }
     }
   }
 }
@@ -114,9 +117,10 @@ export function parseExport(text: string, now = Date.now()): Snapshot {
   if (now - exportedAt > 86400000) warnings.push('This snapshot is over a day old. Import again after changes in-game.');
   if (!raw.equipment) warnings.push('Equipment was not supplied in this export; it is unknown rather than empty.');
   if (!huts) warnings.push('Builder capacity could not be detected. A conservative one-builder assumption is used; adjust it in Preferences.');
+  if (huts + bob > 6) warnings.push('Builder capacity exceeds the supported six builders. Forecast capacity is capped; original counts are preserved.');
   return { id: `${raw.tag}:${raw.timestamp}:${fingerprint(raw)}`, tag: raw.tag.toUpperCase(), exportedAt,
     importedAt: now, townHall: levelOf(1000001), builderHall: levelOf(1000034),
-    builders: huts ? huts + bob : 1, entities, sections: seenSections, boosts: (raw.boosts ?? {}) as JsonObject,
+    builders: huts ? Math.min(6, huts + bob) : 1, entities, sections: seenSections, boosts: (raw.boosts ?? {}) as JsonObject,
     warnings, raw };
 }
 

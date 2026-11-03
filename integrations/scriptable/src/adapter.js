@@ -69,11 +69,14 @@ function render(accounts, parameter) {
     text(widget, single ? 'TH ' + account.townHall + ' · ' + Math.max(0, account.builders - busy) + '/' + account.builders + ' builders free*' : account.name + ' · TH ' + account.townHall, 11, true);
     widget.addSpacer(5);
     for (const row of active.slice(0, single ? small ? 1 : large ? 4 : 2 : 1)) {
-      text(widget, row.name, 12, false, true);
+      const line = small ? widget : widget.addStack();
+      if (!small) { line.layoutHorizontally(); line.centerAlignContent(); }
+      text(line, row.name, 12, false, true);
+      if (!small) line.addSpacer(8);
       // Absolute finish times stay correct when iOS postpones a widget reload.
       // Scriptable timer dates count upward after their deadline and cannot clamp at zero.
-      const finish = widget.addDate(new Date(row.end)); finish.applyTimeStyle(); finish.textColor = primary; finish.font = Font.semiboldMonospacedSystemFont(small ? 20 : 15);
-      if (!small) text(widget, row.level + ' · ' + new Date(row.end).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' }), 10, true);
+      const finish = line.addDate(new Date(row.end)); finish.applyTimeStyle(); finish.textColor = primary; finish.font = Font.semiboldMonospacedSystemFont(small ? 20 : 15);
+      if (large) text(widget, row.level + ' · ' + new Date(row.end).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' }), 10, true);
       ends.push(row.end); widget.addSpacer(5);
     }
     if (!active.length) text(widget, 'No running timers', 12);
@@ -81,7 +84,7 @@ function render(accounts, parameter) {
   }
   widget.addSpacer();
   const account = single ? selected[0] : null;
-  text(widget, account ? (now - account.exportedAt > 86400000 ? 'Old export ' : 'Saved ') + new Date(account.exportedAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) + ' · Estimates' : 'Saved snapshots · Estimates', 10, true);
+  text(widget, account ? (now - account.exportedAt > 86400000 ? 'Old export ' : 'Saved ') + new Date(account.exportedAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) + ' · Estimates' : (selected.some(item => now - item.exportedAt > 86400000) ? 'Older snapshots' : 'Saved snapshots') + ' · Estimates', 10, true);
   widget.refreshAfterDate = new Date(ends.length ? Math.max(now + 60000, Math.min(...ends) + 1000) : now + 1800000);
   return widget;
 }

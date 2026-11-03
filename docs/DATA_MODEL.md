@@ -30,3 +30,7 @@ Resource costs are shown as catalogue estimates. No current resource balance, ge
 ## Source fixtures
 
 `tests/fixtures/village-export.json` and `helper-export.json` are anonymized public fixtures from [chitti-a7r4/coc-tracker](https://github.com/chitti-a7r4/coc-tracker), commit `bfc032175fe1d87235e7e97f6fea5a75cf3a4d48`. They are not the owner's private exports. The sample workspace rebases synthetic timestamps and uses explicit demo identities.
+
+## Workspace persistence boundary
+
+Current snapshots/history are stored as immutable app-private JSON file generations, with a small AsyncStorage pointer committed after the generation write succeeds. This avoids the Android SQLite CursorWindow limit for a large single value. Readable old workspace values migrate once; an unreadable stored value/file is retained for explicit backup recovery. The compact backup format remains version 1, with a 20 MB UTF-8 bound. At most 25 villages and 60 snapshots per village are retained, subject to that total size bound. Unknown raw fields remain in every accepted snapshot.

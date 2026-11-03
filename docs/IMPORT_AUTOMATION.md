@@ -54,7 +54,7 @@ The script requires the host to keep running and the connected Android device to
 
 ## iOS next phase
 
-The Android ADB transport does not deliver directly to an iPhone. The retained iOS receiver/widget code needs native compilation and device tests.
+The Android ADB transport does not deliver directly to an iPhone. Native app/widget compilation now passes on hosted macOS/Xcode; physical iPhone verification remains open. An optional standalone Scriptable widget is also implemented. See [iPhone setup](IOS_SETUP.md) for both paths and their limitations.
 
 Native Shortcut: **Get Clipboard → URL Encode → Open URLs**, using `cocwidget://sync?token=YOUR_PAIRING_CODE&data=` followed by encoded text. With Automatic imports enabled and the correct pairing code, a valid request saves and publishes without an app Save prompt. An App/Is Closed personal automation can trigger that handoff when leaving Clash. It still needs a fresh export in the clipboard; that event does not make the game export JSON. An App Intent/share extension is tracked separately in the PRD.
 

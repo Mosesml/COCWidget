@@ -1,9 +1,8 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { decodeBackup, emptyWorkspace, encodeBackup, updateAccount } from '../core/workspace';
+import { updateAccount } from '../core/workspace';
 import type { Preferences, Workspace } from '../core/types';
+import { workspaceStorage } from './workspaceStorage';
 
-const key = '@cocwidget/workspace-v1';
 export function useWorkspace() {
   const [workspace, setWorkspace] = useState<Workspace | null>(null);
   const [error, setError] = useState('');
@@ -11,8 +10,7 @@ export function useWorkspace() {
   const writes = useRef<Promise<unknown>>(Promise.resolve());
   useEffect(() => {
     let active = true;
-    AsyncStorage.getItem(key).then(text => {
-      const value = text ? decodeBackup(text) : emptyWorkspace();
+    workspaceStorage.load().then(value => {
       if (active) { current.current = value; setWorkspace(value); }
     }).catch(() => {
       if (active) setError('Your saved data could not be read. It has been kept intact. Restore a backup, or explicitly reset this device.');
@@ -23,15 +21,16 @@ export function useWorkspace() {
     const next = writes.current.catch(() => {}).then(async () => {
       if (!current.current) throw new Error('Workspace is not ready.');
       const value = mutate(current.current);
-      await AsyncStorage.setItem(key, encodeBackup(value));
+      if (value !== current.current) await workspaceStorage.save(value);
       current.current = value; setWorkspace(value); return value;
     });
     writes.current = next; return next;
   }, []);
   const replace = useCallback((value: Workspace) => {
     const next = writes.current.catch(() => {}).then(async () => {
-      await AsyncStorage.setItem(key, encodeBackup(value));
+      await workspaceStorage.save(value);
       current.current = value; setWorkspace(value); setError('');
+      return value;
     });
     writes.current = next; return next;
   }, []);

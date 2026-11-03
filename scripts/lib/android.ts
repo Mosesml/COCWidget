@@ -19,8 +19,14 @@ export class AndroidDevice {
     if (!/^[A-Za-z0-9_.:-]{1,100}$/.test(serial)) throw new Error('Specify a valid Android device serial.');
   }
   async run(...args: string[]) {
-    const result = await exec(this.adb, ['-s', this.serial, ...args], { timeout: 30_000, maxBuffer: 2_000_000 });
-    return result.stdout.trim();
+    try {
+      const result = await exec(this.adb, ['-s', this.serial, ...args], { timeout: 30_000, maxBuffer: 2_000_000 });
+      return result.stdout.trim();
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Android command failed.';
+      // execFile errors include command arguments, including a failed launch's pairing URI.
+      throw new Error(this.token ? message.replaceAll(this.token, '[pairing code redacted]') : message);
+    }
   }
   async check() {
     if (!this.token || !/^[a-f0-9]{64}$/.test(this.token)) throw new Error('Set COCWIDGET_TOKEN to the automation pairing code copied from COCWidget settings.');

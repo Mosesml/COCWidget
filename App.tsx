@@ -54,6 +54,7 @@ function WidgetSetup() {
     enabled: () => enabledRef.current,
     authorize: request => !!tokenRef.current && request.token === tokenRef.current,
     commit: store.commit,
+    replace: store.replace,
     publish: publishWidgets,
     clipboard: clipboardText,
     readFile: readIncomingExport,
@@ -62,7 +63,7 @@ function WidgetSetup() {
       try { await AsyncStorage.setItem(resultKey, JSON.stringify(result)); }
       finally { await reportNativeSync(result); }
     },
-  }), [store.commit]);
+  }), [store.commit, store.replace]);
   useEffect(() => {
     const receive = (link: string) => {
       try {
@@ -116,13 +117,14 @@ function WidgetSetup() {
       const picked = await DocumentPicker.getDocumentAsync({ type: ['application/json', 'text/plain'], copyToCacheDirectory: true });
       if (picked.canceled) return;
       const asset = picked.assets[0]!;
-      if ((asset.size ?? 0) > (restore ? 20_000_000 : 1_000_000)) throw new Error('That file exceeds the supported size.');
-      const text = await new File(asset.uri).text();
+      const limit = restore ? 20_000_000 : 1_000_000, file = new File(asset.uri);
+      if ((asset.size ?? 0) > limit || file.size > limit) throw new Error('That file exceeds the supported size.');
+      const text = await file.text();
       if (restore) {
         const value = decodeBackup(text);
         Alert.alert('Replace saved villages?', 'This restores the selected backup on this device.', [
           { text: 'Cancel', style: 'cancel' }, { text: 'Restore', onPress: () => {
-            void service.update(() => value).catch(error => setMessage(error.message));
+            void service.replace(value).catch(error => setMessage(error.message));
           } },
         ]);
       } else await manual(text);

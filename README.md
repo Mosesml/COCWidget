@@ -60,6 +60,7 @@ npm run check                 # TypeScript, domain/automation tests, native JS b
 npm run check:widget-layout   # isolated iOS layout registry (after iOS prebuild)
 ```
 
+- [Audit results and remaining limits](docs/AUDIT.md)
 - [iPhone setup and alternatives](docs/IOS_SETUP.md)
 - [Android/iOS compatibility](docs/COMPATIBILITY.md)
 - [PRD and platform roadmap](docs/PRD.md)

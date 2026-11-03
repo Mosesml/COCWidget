@@ -34,14 +34,14 @@ function VillageLayout(props: WidgetProjection, environment: WidgetEnvironment<{
             <Text modifiers={[font({ size: 13, weight: 'medium' }), foregroundStyle(primary), lineLimit(1)]}>{row.name}</Text><Spacer />
             <Text timerInterval={{ lower: new Date(now), upper: new Date(row.end) }} countsDown modifiers={[font({ size: 16, weight: 'semibold' }), foregroundStyle(primary), monospacedDigit(), lineLimit(1)]} />
           </HStack>}
-          {!small && <Text modifiers={[font({ size: 10 }), foregroundStyle(secondary), lineLimit(1)]}>{row.level} · {new Date(row.end).toLocaleString(undefined, { weekday: 'short', hour: 'numeric', minute: '2-digit' })}</Text>}
+          {!small && (account || large) && <Text modifiers={[font({ size: 10 }), foregroundStyle(secondary), lineLimit(1)]}>{row.level} · {new Date(row.end).toLocaleString(undefined, { weekday: 'short', hour: 'numeric', minute: '2-digit' })}</Text>}
         </VStack>)}
         {!active.length && <Text modifiers={[font({ size: 12 }), foregroundStyle(primary), lineLimit(2)]}>No running timers</Text>}
         {account && large && item.nextAction && <Text modifiers={[font({ size: 12 }), foregroundStyle(secondary), lineLimit(1)]}>Next · {item.nextAction.name} {item.nextAction.level}</Text>}
       </VStack>;
     })}
     <Spacer />
-    <Text modifiers={[font({ size: 10 }), foregroundStyle(secondary), lineLimit(1)]}>{account ? `${now - account.exportedAt > 86400000 ? 'Old export' : 'Saved'} ${new Date(account.exportedAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}` : 'Saved snapshots'} · Estimates</Text>
+    <Text modifiers={[font({ size: 10 }), foregroundStyle(secondary), lineLimit(1)]}>{account ? `${now - account.exportedAt > 86400000 ? 'Old export' : 'Saved'} ${new Date(account.exportedAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}` : selected.some(item => now - item.exportedAt > 86400000) ? 'Older snapshots' : 'Saved snapshots'} · Estimates</Text>
   </VStack>;
 }
 

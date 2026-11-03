@@ -8,7 +8,7 @@ The product is a native Android widget with a small Expo/React Native setup util
 
 `src/core/sync.ts` owns serialized imports, duplicate/older handling, fresh-export/account guards and acknowledgement ordering. Invalid data cannot replace stored snapshots. Publishing can fail after persistence; retrying the same export republishes without adding duplicate history. Active app village selection does not change on background import.
 
-`src/app/useWorkspace.ts` serializes AsyncStorage writes. `App.tsx` is a compact native setup/import utility: automation enablement, last result, saved villages and backup/recovery. First launch starts empty. Existing local workspaces remain readable.
+`src/app/useWorkspace.ts` serializes workspace changes. `src/core/persistence.ts` writes immutable app-private JSON generations and commits a small AsyncStorage pointer afterward, avoiding Android's per-value read limit. Readable legacy workspace values migrate after validation; failed writes keep the previous pointer. Only settings/pointer metadata remain in AsyncStorage. Unchanged refreshes do not rewrite the workspace. `App.tsx` is a compact native setup/import utility: automation enablement, last result, saved villages and backup/recovery. First launch starts empty. Existing local workspaces remain readable.
 
 ## Android transport
 

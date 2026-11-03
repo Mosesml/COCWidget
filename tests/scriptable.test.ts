@@ -33,6 +33,8 @@ function runtime(files = new Map<string, string>(), parameter?: unknown, widget 
     children: any[] = [];
     addText(value: string) { const text = { text: value }; this.children.push(text); return text; }
     addDate(value: Date) { const date = { date: value, applyTimeStyle() {} }; this.children.push(date); return date; }
+    addStack() { const stack = new Element(); this.children.push(stack); return stack; }
+    layoutHorizontally() {} centerAlignContent() {}
     addSpacer() {} setPadding() {} presentMedium() {}
   }
   const context = vm.createContext({

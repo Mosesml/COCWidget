@@ -7,9 +7,9 @@ Current work removes the website and prioritizes Android. Historical browser che
 | Check | Outcome |
 | --- | --- |
 | TypeScript | Pass. |
-| Domain/automation/platform tests | 35 pass, including paired authorization, size/depth limits, cancellation, file bounds, generated Scriptable execution and RemoteViews class restrictions. |
+| Domain/automation/platform tests | 41 pass, including paired authorization, size/depth limits, cancellation, file bounds, generated Scriptable execution and RemoteViews class restrictions. |
 | Native JavaScript exports | Android and iOS exports pass after the website removal. |
-| Updated Android native compilation | Pass: debug build and standalone ARM64 release preview (development signing key). Standalone receiver also tested with Metro stopped. |
+| Updated Android native compilation | Pass: debug build and standalone universal release preview with ARMv7, ARM64, x86 and x86_64 (development signing key). Standalone receiver also tested with Metro stopped. |
 | Updated automatic file/clipboard receiver on emulator | Pass: enablement gate, file delivery, cold receiver start, atomic-file watcher and installed-widget update without a Save prompt. |
 | Export-menu runner using synthetic development source | Pass: interactive calibration, Settings/More Settings/Copy/menu cleanup, fresh clipboard validation and native widget acknowledgement. |
 | Export-menu calibration against real Clash client | Not verified; no live client/device profile has been established here. |
@@ -59,3 +59,15 @@ The iOS job [compiled the app and extension successfully](https://github.com/Mos
 ![Monochrome Android widget](screenshots/android-monochrome.png)
 
 ![Android widget at 200 percent text size](screenshots/android-large-text.png)
+
+## Large-workspace persistence and universal APK
+
+The immutable file-generation repository migrated the old SQLite workspace, imported four large synthetic snapshots, and retained 2,923,996 bytes of history. After force-stopping the app, duplicate file delivery cold-started it, read that history and returned `unchanged` with native publication acknowledgement. The old large AsyncStorage row was removed, leaving a 41-character pointer. Tests cover file/pointer failures retaining the previous generation, legacy migration and explicit recovery while current storage is unreadable.
+
+Universal Android compilation passes for `armeabi-v7a`, `arm64-v8a`, `x86` and `x86_64`. APK inspection confirms all four architectures, minimum API 24, target API 36 and compile API 37. The final config blocks overlay and broad external-storage permissions; only ARM64 runtime behavior is tested. Hosted SDK setup now pins current command-line tools and the exact `platforms;android-37.0` repository package.
+
+APK inspection after permission cleanup lists Internet, Vibrate and the generated non-exported-receiver permission; SYSTEM_ALERT_WINDOW, READ_EXTERNAL_STORAGE and WRITE_EXTERNAL_STORAGE are absent.
+
+Actual recovery was then tested: after backing up and intentionally corrupting only the synthetic file generation, the app showed its unreadable-data state. Selecting the 2.92 MB JSON through the system Downloads picker and confirming Restore recovered one village with five snapshots and republished the widget. No reset or manual repair was needed. The permission-restricted universal APK was then installed for the final delivery check. APK zip alignment passes the 16 KB packaging check (`zipalign -c -P 16 4`); no 16 KB-page device runtime claim is made.
+
+Final permission-restricted universal APK: installed successfully, app force-stopped, existing large export delivered through the real CLI, workspace loaded from its private file, and `unchanged` / native publication acknowledgement received. This establishes that broad storage/overlay permissions are unnecessary for the implemented sync path.

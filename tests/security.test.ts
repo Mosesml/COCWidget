@@ -6,9 +6,9 @@ import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { parseExport } from '../src/core/import';
 import { parseSyncLink, SyncCoordinator } from '../src/core/sync';
-import { emptyWorkspace } from '../src/core/workspace';
+import { acceptSnapshot, decodeBackup, emptyWorkspace, encodeBackup } from '../src/core/workspace';
 import { readExport } from '../scripts/lib/watch';
-import { isSyncResult } from '../scripts/lib/android';
+import { AndroidDevice, isSyncResult } from '../scripts/lib/android';
 import { widgetDates } from '../src/core/widgets';
 
 test('unpaired external requests cannot read clipboard/files or mutate storage', async () => {
@@ -35,6 +35,22 @@ test('unknown fields remain bounded by UTF-8 size, depth and finite values', () 
   assert.throws(() => parseExport(JSON.stringify(raw).replace(/"timestamp":\s*\d+/, '"timestamp":1e999')), /invalid number/);
   const many = { ...raw, unknown_timers: Array.from({ length: 65 }, () => ({ data: 9999999, timer: 10 })) };
   assert.throws(() => parseExport(JSON.stringify(many)), /64 active timer/);
+  assert.throws(() => parseExport(JSON.stringify({ ...raw, unknown: Array(50001).fill(0) })), /too complex/);
+});
+test('unexpected builder counts cannot create an unrestorable workspace', () => {
+  const input = JSON.parse(JSON.stringify(raw));
+  input.buildings.push({ data: 1000015, lvl: 1, cnt: 10000 });
+  const snapshot = parseExport(JSON.stringify(input));
+  assert.equal(snapshot.builders, 6);
+  const restored = decodeBackup(encodeBackup(acceptSnapshot(emptyWorkspace(), snapshot)));
+  assert.equal(restored.accounts[0]!.preferences.builders, 6);
+  assert.equal(restored.accounts[0]!.snapshots[0]!.raw.buildings instanceof Array, true);
+});
+test('failed ADB launch diagnostics do not expose the pairing code', async () => {
+  const token = 'a'.repeat(64), device = new AndroidDevice('test', process.execPath, token);
+  await assert.rejects(device.run('shell', 'am', 'start', '-d', `cocwidget://sync-file?token=${token}`), (error: Error) => {
+    assert.ok(!error.message.includes(token)); assert.match(error.message, /redacted/); return true;
+  });
 });
 test('file reads reject oversized data and invalid UTF-8', async () => {
   const directory = await mkdtemp(join(tmpdir(), 'coc-bounds-'));

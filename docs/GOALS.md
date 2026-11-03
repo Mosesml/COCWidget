@@ -65,4 +65,11 @@ Current priority from Moses: **widget + working automatic refresh, Android first
 
 - Final Android check: the repeated synthetic export loop completed two unattended 60-second cycles. The standalone APK then accepted a 307,618-byte export with Metro stopped and the companion initially force-stopped; an installed widget showed the updated timer. No website is required. Live Clash device calibration and iOS device work remain open.
 
-- Audit checkpoint: private pairing gate tested in the standalone Android app, 35 automated tests pass, 42 isolated iOS SDK layout states pass, and native iOS compilation succeeds at `4eabfa0`. Android CI setup was found to request obsolete SDK `tools`; explicit SDK packages replace that default. Scriptable uses the same parser and preserves one full latest export per village; its physical iPhone integration is unverified.
+- Audit checkpoint: private pairing gate tested in the standalone Android app, 41 automated tests pass, 42 isolated iOS SDK layout states pass, and native iOS compilation succeeds at `4eabfa0`. Android CI setup was found to request obsolete SDK `tools`; explicit SDK packages replace that default. Scriptable uses the same parser and preserves one full latest export per village; its physical iPhone integration is unverified.
+
+- Storage/compatibility checkpoint: full workspaces use immutable app-private generations with a committed pointer; readable legacy data migrates. A 2,923,996-byte synthetic history survived force-stop/restart and duplicate delivery. All four Android ABIs compile into the universal preview; packaged minimum API is 24. Unnecessary overlay and broad storage permissions are blocked.
+
+- [x] File-generation failure/recovery regressions and a real multi-megabyte cold-restart check.
+- [x] Block unused Android overlay and broad storage permissions; APK inspection confirms their removal.
+
+- [x] Actual unreadable-workspace recovery through the Android system file picker restored the 2.92 MB backup and five snapshots.
