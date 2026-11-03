@@ -11,7 +11,8 @@
       "bundleIdentifier": "com.mosesml.cocwidget"
     },
     "android": {
-      "package": "com.mosesml.cocwidget"
+      "package": "com.mosesml.cocwidget",
+      "allowBackup": false
     },
     "web": {
       "bundler": "metro",
@@ -19,7 +20,38 @@
     },
     "plugins": [
       "expo-sharing",
-      "expo-widgets"
+      [
+        "expo-widgets",
+        {
+          "groupIdentifier": "group.com.mosesml.cocwidget",
+          "enableAndroid": false,
+          "widgets": [
+            {
+              "name": "VillageWidget",
+              "displayName": "Your village",
+              "description": "Your next useful upgrade and upcoming completions.",
+              "ios": {
+                "supportedFamilies": ["systemSmall", "systemMedium", "systemLarge"],
+                "initialLayout": "src/widgets/VillageWidget.ios.tsx",
+                "configuration": {
+                  "title": "Choose your village",
+                  "description": "Each widget keeps its own selection.",
+                  "parameters": {
+                    "village": {
+                      "title": "Village",
+                      "type": "enum",
+                      "default": "all",
+                      "dynamic": true,
+                      "values": [{ "name": "All villages", "value": "all" }]
+                    }
+                  }
+                }
+              },
+              "android": null
+            }
+          ]
+        }
+      ]
     ]
   }
 }

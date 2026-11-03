@@ -1,0 +1,6 @@
+{
+  "name": "coc-widget-native",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Android per-instance village widgets for COCWidget"
+}

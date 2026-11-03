@@ -8,6 +8,7 @@ export const defaults = (builders = 6): Preferences => ({ goal: 'army', armyId: 
 export const emptyWorkspace = (): Workspace => ({ version: 1, activeTag: null, accounts: [] });
 export function acceptSnapshot(workspace: Workspace, snapshot: Snapshot, name?: string): Workspace {
   const existing = workspace.accounts.find(account => account.tag === snapshot.tag);
+  if (!existing && workspace.accounts.length >= 25) throw new Error('This workspace supports up to 25 villages. Export a backup before removing an older village.');
   if (existing) {
     const current = currentSnapshot(existing);
     if (snapshot.exportedAt < current.exportedAt) throw new Error('This export is older than the saved snapshot. Keep your newer data.');
@@ -28,7 +29,12 @@ export function deleteAccount(workspace: Workspace, tag: string): Workspace {
   return { ...workspace, accounts, activeTag: workspace.activeTag === tag ? accounts[0]?.tag ?? null : workspace.activeTag };
 }
 export function encodeBackup(workspace: Workspace) {
-  return JSON.stringify({ format: 'cocwidget-backup', version: 1, workspace }, null, 2);
+  const compact = { ...workspace, accounts: workspace.accounts.map(account => ({ ...account,
+    snapshots: account.snapshots.map(snapshot => ({ raw: snapshot.raw, importedAt: snapshot.importedAt })),
+  })) };
+  const text = JSON.stringify({ format: 'cocwidget-backup', version: 1, workspace: compact }, null, 2);
+  if (text.length > 20_000_000) throw new Error('This workspace exceeds the 20 MB backup limit. Export older villages separately before adding more history.');
+  return text;
 }
 export function decodeBackup(text: string, now = Date.now()): Workspace {
   if (text.length > 20_000_000) throw new Error('Backup exceeds the 20 MB limit.');

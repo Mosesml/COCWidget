@@ -14,50 +14,50 @@ Use `[x]` for implemented and checked behavior, `[ ]` for outstanding work. Nati
 - [x] Preserve complete exports, decode inventory and traverse nested modules.
 - [x] Version and attribute the catalogue with explicit normalization rules.
 - [x] Validate imports before saving and retain unknown fields/IDs.
-- [ ] Persist multiple villages, history, goals, queue and ore targets independently.
+- [x] Persist multiple villages, history, goals, queue and ore targets independently.
 - [x] Verify raw preservation, timestamps, counts, partial snapshots and backup validation.
 
 ## G2 — improve my army
 
-- [ ] Army templates and explained upgrade priorities.
-- [ ] Goal selection and attainable research/equipment targets.
-- [ ] Readiness breakdown with supported prerequisites.
+- [x] Army templates and explained upgrade priorities.
+- [x] Goal selection and attainable research/equipment targets.
+- [x] Readiness breakdown with supported prerequisites.
 
 ## G3 — practical plan
 
-- [ ] Queue editing and separate worker/research lanes.
-- [ ] Existing upgrades, dependencies, online hours and protected hero deadlines.
-- [ ] Resource totals and honest duration/affordability assumptions.
-- [ ] Supported magic-item and boost comparisons.
+- [x] Queue editing and separate worker/research lanes.
+- [x] Existing upgrades, dependencies, online hours and protected hero deadlines.
+- [x] Resource totals and honest duration/affordability assumptions.
+- [x] Supported magic-item and boost comparisons (two potions and two books).
 
 ## G4 — equipment and ore
 
-- [ ] Equipment inventory, level targets and catalogue ability breakpoints.
-- [ ] Ore costs, entered balances and deficits.
-- [ ] Persistent, army-aware spending priorities.
+- [x] Equipment inventory, level targets and catalogue ability breakpoints.
+- [x] Ore costs, entered balances and deficits.
+- [x] Persistent, army-aware spending priorities.
 
 ## G5 — progress
 
-- [ ] Snapshot history and aggregate level changes.
-- [ ] Wall/hero milestones and missing-section handling.
-- [ ] Share/export a readable progress report.
+- [x] Snapshot history and aggregate level changes.
+- [x] Wall/hero milestones and missing-section handling.
+- [x] Share/export a readable progress report (native delivery still needs a device check).
 
 ## G6 — import and widgets
 
-- [ ] Paste/file preview and automatic widget projection after save.
-- [ ] Validated import deep links and an iOS Shortcut guide.
-- [ ] iOS native widget layouts and account configuration.
-- [ ] Android native widget layouts and account-scoped projections.
-- [ ] Overview across accounts and accurate snapshot-freshness labels.
-- [ ] Validate native generation/builds where available.
+- [x] Paste/file preview and automatic widget projection after save.
+- [x] Validated import deep links and an iOS Shortcut guide.
+- [x] iOS native widget layouts and account configuration (source and generation checked).
+- [x] Android native widget layouts and account-scoped projections (source and autolinking checked).
+- [x] Overview across accounts and accurate snapshot-freshness labels.
+- [ ] Complete native compilation and device validation.
 - [ ] Verify iOS widget import/update on a simulator or physical device.
 - [ ] Verify Android widget import/update on an emulator or physical device.
 
 ## G7 — usable application
 
-- [ ] Today, Army, Plan, Equipment and Progress screens with real behavior.
-- [ ] Responsive layout, accessible controls and import/empty/error states.
-- [ ] Backup/restore and explicit village deletion.
+- [x] Today, Army, Plan, Equipment and Progress screens with real behavior.
+- [x] Responsive layout, accessible controls and import/empty/error states.
+- [x] Backup/restore and explicit village deletion.
 - [ ] Type check, domain tests, app bundle and interactive checks.
 - [ ] CI, setup instructions, validation record and clean pushed commits.
 
@@ -73,4 +73,5 @@ Use `[x]` for implemented and checked behavior, `[ ]` for outstanding work. Nati
 
 - Planning: PRD and working agreement committed before implementation.
 - Core: full parser, catalogue normalization, account/history models, strategy, scheduler, ore calculations and boost projections pass 11 regression tests. Type checking and initial browser export pass. Interactive app screens are next.
+- App: six browser flows pass across desktop and phone: planning, equipment persistence, history/accounts, valid/invalid imports, all five mobile screens, and corrupted-storage recovery. iOS app bundle exports, both native projects generate, and the Android per-instance module autolinks. Native device release readiness remains open.
 

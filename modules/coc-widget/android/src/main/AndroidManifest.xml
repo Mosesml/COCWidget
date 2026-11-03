@@ -1,0 +1,11 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+  <application>
+    <receiver android:name="com.mosesml.cocwidget.bridge.VillageWidgetProvider" android:exported="false" android:label="COCWidget">
+      <intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE" /></intent-filter>
+      <meta-data android:name="android.appwidget.provider" android:resource="@xml/coc_village_widget" />
+    </receiver>
+    <activity android:name="com.mosesml.cocwidget.bridge.WidgetConfigurationActivity" android:exported="true" android:label="Choose your village">
+      <intent-filter><action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" /></intent-filter>
+    </activity>
+  </application>
+</manifest>
