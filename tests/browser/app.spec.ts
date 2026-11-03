@@ -42,8 +42,9 @@ test('history and account switching retain village-specific data', async ({ page
   await expect(page.getByText('+62 levels', { exact: true })).toBeVisible();
 });
 test('invalid imports preserve data; accepted imports preserve unknown fields', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
   await page.goto('/');
-  await page.getByRole('button', { name: 'Update village', exact: true }).click();
+  await page.getByRole('button', { name: 'Import', exact: true }).click();
   await page.getByLabel('Village export JSON', { exact: true }).fill('{broken');
   await page.getByRole('button', { name: 'Preview village', exact: true }).click();
   await expect(page.getByText(/That is not valid JSON/)).toBeVisible();
@@ -51,9 +52,13 @@ test('invalid imports preserve data; accepted imports preserve unknown fields', 
   raw.tag = '#MYVILLAGE'; raw.timestamp = Math.floor(Date.now() / 1000); raw.future_field = { preserved: true };
   await page.getByLabel('Village export JSON', { exact: true }).fill(JSON.stringify(raw));
   await page.getByRole('button', { name: 'Preview village', exact: true }).click();
+  await expect(page.getByLabel('Village export JSON', { exact: true })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'Save village & update widgets', exact: true })).toBeInViewport();
   await page.getByLabel('Village name (optional)', { exact: true }).fill('My imported village');
   await page.getByRole('button', { name: 'Save village & update widgets', exact: true }).click();
   await expect(page.getByText('My imported village', { exact: true })).toBeVisible();
+  const preferences = await page.getByRole('button', { name: 'Preferences', exact: true }).boundingBox();
+  expect(preferences!.x + preferences!.width).toBeLessThanOrEqual(390);
   await expect(page.getByText('Sample workspace', { exact: true })).toHaveCount(0);
   const saved = await page.evaluate(() => JSON.parse(localStorage.getItem('@cocwidget/workspace-v1')!));
   expect(saved.workspace.accounts.find((a: { tag: string }) => a.tag === '#MYVILLAGE').snapshots[0].raw.future_field).toEqual({ preserved: true });

@@ -109,8 +109,8 @@ function Application() {
     <View style={{ flex: 1, minWidth: 0 }}>
       <View style={[s.topbar, { paddingHorizontal: desktop ? 36 : 20 }]}>
         {desktop ? <View style={common.row}><Icon name="leaf" size={16} tint={color.green} /><Text style={s.topbarText}>A companion for the way you play</Text></View> : <Wordmark small />}
-        <View style={[common.row, { gap: 9 }]}>
-          {account && <Pressable accessibilityRole="button" accessibilityLabel="Switch village" onPress={() => setDialog('accounts')} style={s.accountSwitch}><View style={s.accountMark}><Text style={{ color: color.green, fontWeight: '700', fontSize: 11 }}>{snapshot?.townHall}</Text></View><View style={{ gap: 2 }}><Text style={{ color: color.ink, fontSize: 12, fontFamily: font, fontWeight: '600' }}>{account.name}</Text>{desktop && <Text style={{ color: color.muted, fontSize: 10, fontFamily: font }}>Town Hall {snapshot?.townHall}</Text>}</View><Icon name="down" size={14} /></Pressable>}
+        <View style={[common.row, { gap: 9 }, !desktop && { flex: 1, minWidth: 0, justifyContent: 'flex-end' }]}>
+          {account && <Pressable accessibilityRole="button" accessibilityLabel="Switch village" onPress={() => setDialog('accounts')} style={[s.accountSwitch, { flexShrink: 1, minWidth: 0, maxWidth: desktop ? 360 : undefined }]}><View style={s.accountMark}><Text style={{ color: color.green, fontWeight: '700', fontSize: 11 }}>{snapshot?.townHall}</Text></View><View style={{ gap: 2, flexShrink: 1, minWidth: 0 }}><Text numberOfLines={1} style={{ color: color.ink, fontSize: 12, fontFamily: font, fontWeight: '600' }}>{account.name}</Text>{desktop && <Text style={{ color: color.muted, fontSize: 10, fontFamily: font }}>Town Hall {snapshot?.townHall}</Text>}</View><Icon name="down" size={14} /></Pressable>}
           {!desktop && account && <Pressable accessibilityRole="button" accessibilityLabel="Preferences" onPress={() => setDialog('settings')} style={s.iconButton}><Icon name="settings" size={18} /></Pressable>}
         </View>
       </View>

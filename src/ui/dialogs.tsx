@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Linking, Platform, Pressable, Text, View } from 'react-native';
 import * as Clipboard from 'expo-clipboard';
 import * as DocumentPicker from 'expo-document-picker';
@@ -42,12 +42,13 @@ export function ImportDialog({ workspace, initial = '', onClose, onSave }: { wor
   const change = (value: string) => { setText(value); setPreview(null); setError(''); };
   const paste = async () => { try { change(await Clipboard.getStringAsync()); } catch { setError('Clipboard access was unavailable. Paste the text into the box directly.'); } };
   const pick = async () => { try { const data = await chooseJson(); if (data !== null) change(data); } catch (e) { setError((e as Error).message); } };
-  const check = () => { try { const result = parseExport(text); setPreview(result); setName(workspace.accounts.find(a => a.tag === result.tag)?.name ?? ''); setError(''); } catch (e) { setError((e as Error).message); } };
+  const check = (value = text) => { try { const result = parseExport(value); setPreview(result); setName(workspace.accounts.find(a => a.tag === result.tag)?.name ?? ''); setError(''); } catch (e) { setError((e as Error).message); } };
+  useEffect(() => { if (initial) { setText(initial); setPreview(null); check(initial); } }, [initial]);
   const save = async () => { if (!preview) return; setBusy(true); try { await onSave(preview, name); onClose(); } catch (e) { setError((e as Error).message); } finally { setBusy(false); } };
-  return <Sheet title="Bring your village along" subtitle="Copy your village export in Clash of Clans, then paste it here." onClose={onClose}>
-    <View style={{ gap: 10, backgroundColor: color.limeLight, padding: 16, borderRadius: 14 }}><Text style={[styles.body, { fontWeight: '600' }]}>Settings → More Settings → Data Export → Copy</Text><Text style={styles.caption}>Everything stays on this device. After saving, your widget receives the updated village automatically.</Text></View>
+  return <Sheet title={preview ? 'Review your village' : 'Bring your village along'} subtitle={preview ? 'Save this snapshot to update your plan and home-screen widgets.' : 'Copy your village export in Clash of Clans, then paste it here.'} onClose={onClose}>
+    {!preview && <><View style={{ gap: 10, backgroundColor: color.limeLight, padding: 16, borderRadius: 14 }}><Text style={[styles.body, { fontWeight: '600' }]}>Settings → More Settings → Data Export → Copy</Text><Text style={styles.caption}>Everything stays on this device. After saving, your widget receives the updated village automatically.</Text></View>
     <View style={[styles.row, { flexWrap: 'wrap' }]}><Button tone="secondary" onPress={() => void paste()} icon="import">Paste from clipboard</Button><Button tone="ghost" onPress={() => void pick()} icon="book">Choose JSON file</Button></View>
-    <Field label="Village export JSON" value={text} onChange={change} placeholder={'{"tag":"#YOURTAG","timestamp":…,"buildings":[…]}'} multiline testID="import-json" />
+    <Field label="Village export JSON" value={text} onChange={change} placeholder={'{"tag":"#YOURTAG","timestamp":…,"buildings":[…]}'} multiline testID="import-json" /></>}
     {!!error && <ErrorNote message={error} />}
     {preview && <Card style={{ backgroundColor: color.canvas, padding: 18 }}>
       <View style={styles.row}><Chip>Town Hall {preview.townHall}</Chip><Text style={styles.body}>{preview.tag}</Text></View>
@@ -56,7 +57,8 @@ export function ImportDialog({ workspace, initial = '', onClose, onSave }: { wor
       <Field label="Village name (optional)" value={name} onChange={setName} placeholder="My main village" />
       {preview.warnings.map(warning => <Text key={warning} style={[styles.caption, { color: '#926E34' }]}>{warning}</Text>)}
     </Card>}
-    <Button onPress={preview ? () => void save() : check} disabled={!text.trim()} busy={busy} icon={preview ? 'check' : 'search'} testID="preview-import">{preview ? 'Save village & update widgets' : 'Preview village'}</Button>
+    <Button onPress={preview ? () => void save() : () => check()} disabled={!text.trim()} busy={busy} icon={preview ? 'check' : 'search'} testID="preview-import">{preview ? 'Save village & update widgets' : 'Preview village'}</Button>
+    {preview && <Button tone="ghost" disabled={busy} onPress={() => { setPreview(null); setError(''); }}>Edit JSON</Button>}
   </Sheet>;
 }
 export function BackupDialog({ onClose, replace }: { onClose: () => void; replace: (workspace: Workspace) => Promise<unknown> }) {

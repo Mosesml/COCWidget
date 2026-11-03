@@ -49,60 +49,66 @@ class VillageWidgetProvider : AppWidgetProvider() {
       val selected = accounts.find { it.optString("tag") == selectedTag }
       val deletedSelection = selectedTag != "all" && selected == null
       val now = System.currentTimeMillis()
-      val height = manager.getAppWidgetOptions(id).getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, 180)
-      val rowLimit = if (height < 240) 1 else if (height < 300) 2 else 3
-      val view = RemoteViews(context.packageName, R.layout.coc_village_widget)
-      view.setViewVisibility(R.id.coc_next, if (height < 220) View.GONE else View.VISIBLE)
-      view.setInt(R.id.coc_next, "setMaxLines", if (height < 300) 1 else 2)
-      val title = if (deletedSelection) "Village removed" else selected?.optString("name") ?: "Your villages"
-      view.setTextViewText(R.id.coc_title, title)
-      val items = mutableListOf<JSONObject>()
-      if (selected != null) {
-        val rows = selected.optJSONArray("rows")
-        val active = (0 until (rows?.length() ?: 0)).map { rows!!.getJSONObject(it) }.filter { it.optLong("end") > now }.sortedBy { it.optLong("end") }
-        val busy = active.count { it.optString("lane") == "builder" && !it.optBoolean("extra") }
-        view.setTextViewText(R.id.coc_meta, "TH ${selected.optInt("townHall")} · ${(selected.optInt("builders") - busy).coerceAtLeast(0)} builders expected free" + if (selected.optBoolean("demo")) " · SAMPLE" else "")
-        items.addAll(active.take(rowLimit))
-        val action = selected.optJSONObject("nextAction")
-        view.setTextViewText(R.id.coc_next, if (action != null) "Next: ${action.optString("name")} ${action.optString("level")}" else "Import fresh data after changes in-game")
-        view.setTextViewText(R.id.coc_freshness, "Exported ${DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(Date(selected.optLong("exportedAt")))} · Estimates")
-      } else {
-        view.setTextViewText(R.id.coc_meta, if (deletedSelection) "Choose another village in widget settings" else "${accounts.size} saved villages · Estimates")
-        if (!deletedSelection) accounts.take(rowLimit).forEach { account ->
-          val rows = account.optJSONArray("rows")
-          val next = (0 until (rows?.length() ?: 0)).map { rows!!.getJSONObject(it) }.filter { it.optLong("end") > now }.minByOrNull { it.optLong("end") }
-          items.add(JSONObject().put("name", account.optString("name")).put("level", "TH ${account.optInt("townHall")}")
-            .put("end", next?.optLong("end") ?: 0L).put("overviewHint", next?.optString("name") ?: "No running timers"))
-        }
-        view.setTextViewText(R.id.coc_next, if (accounts.isEmpty()) "Open COCWidget to import a village" else "Each widget keeps its own village selection")
-        view.setTextViewText(R.id.coc_freshness, "Based on saved snapshots · Open app for details")
-      }
-      val rowIds = intArrayOf(R.id.coc_row_one, R.id.coc_row_two, R.id.coc_row_three)
-      rowIds.forEachIndexed { index, rowId ->
-        val item = items.getOrNull(index)
-        view.setViewVisibility(rowId, if (item == null) View.GONE else View.VISIBLE)
-        if (item != null) {
-          val row = RemoteViews(context.packageName, R.layout.coc_widget_row)
-          row.setTextViewText(R.id.coc_row_name, item.optString("name"))
-          val end = item.optLong("end")
-          val finishText = if (end > now) " · " + DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(Date(end)) else ""
-          row.setTextViewText(R.id.coc_row_level, item.optString("overviewHint", item.optString("level")) + finishText)
-          row.setViewVisibility(R.id.coc_row_timer, if (end > now) View.VISIBLE else View.GONE)
-          if (end > now) {
-            row.setChronometer(R.id.coc_row_timer, SystemClock.elapsedRealtime() + end - now, null, true)
-            row.setChronometerCountDown(R.id.coc_row_timer, true)
+      val options = manager.getAppWidgetOptions(id)
+      fun render(height: Int): Pair<RemoteViews, Long?> {
+        val rowLimit = if (height < 240) 1 else if (height < 300) 2 else 3
+        val view = RemoteViews(context.packageName, R.layout.coc_village_widget)
+        view.setViewVisibility(R.id.coc_next, if (height < 220) View.GONE else View.VISIBLE)
+        view.setInt(R.id.coc_next, "setMaxLines", if (height < 300) 1 else 2)
+        val title = if (deletedSelection) "Village removed" else selected?.optString("name") ?: "Your villages"
+        view.setTextViewText(R.id.coc_title, title)
+        val items = mutableListOf<JSONObject>()
+        if (selected != null) {
+          val rows = selected.optJSONArray("rows")
+          val active = (0 until (rows?.length() ?: 0)).map { rows!!.getJSONObject(it) }.filter { it.optLong("end") > now }.sortedBy { it.optLong("end") }
+          val busy = active.count { it.optString("lane") == "builder" && !it.optBoolean("extra") }
+          view.setTextViewText(R.id.coc_meta, "TH ${selected.optInt("townHall")} · ${(selected.optInt("builders") - busy).coerceAtLeast(0)} builders expected free" + if (selected.optBoolean("demo")) " · SAMPLE" else "")
+          items.addAll(active.take(rowLimit))
+          val action = selected.optJSONObject("nextAction")
+          view.setTextViewText(R.id.coc_next, if (action != null) "Next: ${action.optString("name")} ${action.optString("level")}" else "Import fresh data after changes in-game")
+          view.setTextViewText(R.id.coc_freshness, "Exported ${DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(Date(selected.optLong("exportedAt")))} · Estimates")
+        } else {
+          view.setTextViewText(R.id.coc_meta, if (deletedSelection) "Choose another village in widget settings" else "${accounts.size} saved villages · Estimates")
+          if (!deletedSelection) accounts.take(rowLimit).forEach { account ->
+            val rows = account.optJSONArray("rows")
+            val next = (0 until (rows?.length() ?: 0)).map { rows!!.getJSONObject(it) }.filter { it.optLong("end") > now }.minByOrNull { it.optLong("end") }
+            items.add(JSONObject().put("name", account.optString("name")).put("level", "TH ${account.optInt("townHall")}")
+              .put("end", next?.optLong("end") ?: 0L).put("overviewHint", next?.optString("name") ?: "No running timers"))
           }
-          view.removeAllViews(rowId); view.addView(rowId, row)
+          view.setTextViewText(R.id.coc_next, if (accounts.isEmpty()) "Open COCWidget to import a village" else "Each widget keeps its own village selection")
+          view.setTextViewText(R.id.coc_freshness, "Based on saved snapshots · Open app for details")
         }
+        val rowIds = intArrayOf(R.id.coc_row_one, R.id.coc_row_two, R.id.coc_row_three)
+        rowIds.forEachIndexed { index, rowId ->
+          val item = items.getOrNull(index)
+          view.setViewVisibility(rowId, if (item == null) View.GONE else View.VISIBLE)
+          if (item != null) {
+            val row = RemoteViews(context.packageName, R.layout.coc_widget_row)
+            row.setTextViewText(R.id.coc_row_name, item.optString("name"))
+            val end = item.optLong("end")
+            val finishText = if (end > now) " · " + DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(Date(end)) else ""
+            row.setTextViewText(R.id.coc_row_level, item.optString("overviewHint", item.optString("level")) + finishText)
+            row.setViewVisibility(R.id.coc_row_timer, if (end > now) View.VISIBLE else View.GONE)
+            if (end > now) {
+              row.setChronometer(R.id.coc_row_timer, SystemClock.elapsedRealtime() + end - now, null, true)
+              row.setChronometerCountDown(R.id.coc_row_timer, true)
+            }
+            view.removeAllViews(rowId); view.addView(rowId, row)
+          }
+        }
+        val launch = context.packageManager.getLaunchIntentForPackage(context.packageName)
+        if (launch != null) {
+          launch.action = Intent.ACTION_VIEW
+          launch.data = if (selected != null) Uri.parse("cocwidget://village?tag=" + Uri.encode(selected.optString("tag"))) else Uri.parse("cocwidget://villages")
+          view.setOnClickPendingIntent(R.id.coc_widget_root, PendingIntent.getActivity(context, id, launch, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE))
+        }
+        return view to items.map { it.optLong("end") }.filter { it > now }.minOrNull()
       }
-      val launch = context.packageManager.getLaunchIntentForPackage(context.packageName)
-      if (launch != null) {
-        launch.action = Intent.ACTION_VIEW
-        launch.data = if (selected != null) Uri.parse("cocwidget://village?tag=" + Uri.encode(selected.optString("tag"))) else Uri.parse("cocwidget://villages")
-        view.setOnClickPendingIntent(R.id.coc_widget_root, PendingIntent.getActivity(context, id, launch, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE))
-      }
-      manager.updateAppWidget(id, view)
-      val next = items.map { it.optLong("end") }.filter { it > now }.minOrNull()
+      // Let the host choose the orientation-specific layout, including while the app is closed.
+      val landscape = render(options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, 180))
+      val portrait = render(options.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT, 300))
+      manager.updateAppWidget(id, RemoteViews(landscape.first, portrait.first))
+      val next = listOfNotNull(landscape.second, portrait.second).minOrNull()
       val alarm = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
       if (next != null) alarm.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime() + next - now + 1000, refreshIntent(context, id))
       else alarm.cancel(refreshIntent(context, id))

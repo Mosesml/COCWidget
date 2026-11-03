@@ -3,6 +3,7 @@
     "name": "COCWidget",
     "slug": "coc-widget",
     "version": "0.1.0",
+    "icon": "./assets/app-icon.png",
     "scheme": "cocwidget",
     "orientation": "portrait",
     "userInterfaceStyle": "light",
@@ -12,7 +13,11 @@
     },
     "android": {
       "package": "com.mosesml.cocwidget",
-      "allowBackup": false
+      "allowBackup": false,
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#253D2B"
+      }
     },
     "web": {
       "bundler": "metro",
