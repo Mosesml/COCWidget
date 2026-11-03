@@ -22,15 +22,15 @@ class WidgetConfigurationActivity : Activity() {
     val root = LinearLayout(this).apply {
       orientation = LinearLayout.VERTICAL
       setPadding(40, 64, 40, 40)
-      setBackgroundColor(Color.parseColor("#F7F8F2"))
+      setBackgroundColor(Color.parseColor("#F4F4F4"))
     }
     root.addView(TextView(this).apply {
-      text = "Choose a village"; textSize = 27f; setTextColor(Color.parseColor("#253322"))
+      text = "Choose a village"; textSize = 27f; setTextColor(Color.parseColor("#101010"))
       setPadding(0, 0, 0, 24)
     })
     root.addView(TextView(this).apply {
       text = "This widget keeps its own selection when you switch villages in the app."
-      textSize = 15f; setTextColor(Color.parseColor("#607449")); setPadding(0, 0, 0, 30)
+      textSize = 15f; setTextColor(Color.parseColor("#606060")); setPadding(0, 0, 0, 30)
     })
     val accounts = VillageWidgetProvider.projection(this).optJSONArray("accounts")
     fun option(name: String, tag: String) {

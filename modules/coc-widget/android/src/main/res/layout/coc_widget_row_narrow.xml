@@ -1,0 +1,7 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:gravity="start" android:paddingTop="7dp" android:paddingBottom="7dp">
+  <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical">
+    <TextView android:id="@+id/coc_row_name" android:layout_width="match_parent" android:layout_height="wrap_content" android:textColor="#FFFFFF" android:textSize="13sp" android:fontFamily="sans-serif-medium" android:maxLines="1" android:ellipsize="end" />
+    <TextView android:id="@+id/coc_row_level" android:layout_width="match_parent" android:layout_height="wrap_content" android:textColor="#B8B8B8" android:textSize="10sp" android:paddingTop="2dp" android:maxLines="1" android:ellipsize="end" />
+  </LinearLayout>
+  <Chronometer android:id="@+id/coc_row_timer" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#FFFFFF" android:textSize="17sp" android:fontFamily="sans-serif-medium" android:fontFeatureSettings="tnum" android:textStyle="bold" android:paddingTop="4dp" />
+</LinearLayout>

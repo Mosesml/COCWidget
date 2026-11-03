@@ -9,17 +9,21 @@
     "userInterfaceStyle": "light",
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.mosesml.cocwidget"
+      "bundleIdentifier": "com.mosesml.cocwidget",
+      "deploymentTarget": "17.0"
     },
     "android": {
       "package": "com.mosesml.cocwidget",
       "allowBackup": false,
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#253D2B"
+        "backgroundColor": "#101010"
       }
     },
-    "platforms": ["ios", "android"],
+    "platforms": [
+      "ios",
+      "android"
+    ],
     "plugins": [
       "expo-sharing",
       [
@@ -33,7 +37,11 @@
               "displayName": "Your village",
               "description": "Your next useful upgrade and upcoming completions.",
               "ios": {
-                "supportedFamilies": ["systemSmall", "systemMedium", "systemLarge"],
+                "supportedFamilies": [
+                  "systemSmall",
+                  "systemMedium",
+                  "systemLarge"
+                ],
                 "initialLayout": "src/widgets/VillageWidget.ios.tsx",
                 "configuration": {
                   "title": "Choose your village",
@@ -44,7 +52,12 @@
                       "type": "enum",
                       "default": "all",
                       "dynamic": true,
-                      "values": [{ "name": "All villages", "value": "all" }]
+                      "values": [
+                        {
+                          "name": "All villages",
+                          "value": "all"
+                        }
+                      ]
                     }
                   }
                 }

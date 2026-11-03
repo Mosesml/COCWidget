@@ -157,7 +157,7 @@ function WidgetSetup() {
       <Text style={styles.body}>Widget setup and automatic imports</Text>
       {store.error && <View style={styles.section}><Text style={styles.error}>{store.error}</Text><Button title="Restore backup" onPress={() => void choose(true)} /><Button title="Reset unreadable workspace" onPress={() => Alert.alert('Reset saved data?', 'This erases the unreadable workspace on this device.', [{ text: 'Cancel', style: 'cancel' }, { text: 'Reset', style: 'destructive', onPress: () => void store.replace(emptyWorkspace()) }])} /></View>}
       <View style={styles.section}>
-        <View style={styles.row}><View style={{ flex: 1 }}><Text style={styles.heading}>Automatic imports</Text><Text style={styles.body}>Accept JSON from your Shortcut or sync script and refresh widgets without a Save prompt.</Text></View><Switch accessibilityLabel="Automatic imports" disabled={!!store.error} value={enabled} onValueChange={value => void toggle(value)} /></View>
+        <View style={styles.row}><View style={{ flex: 1 }}><Text style={styles.heading}>Automatic imports</Text><Text style={styles.body}>Accept JSON from your Shortcut or sync script and refresh widgets without a Save prompt.</Text></View><Switch trackColor={{ false: '#D0D0D0', true: '#101010' }} accessibilityLabel="Automatic imports" disabled={!!store.error} value={enabled} onValueChange={value => void toggle(value)} /></View>
         <Text style={styles.body}>This accepts available exports. A fresh export must still come from Clash or a configured Android export-menu script.</Text>
         <Button title="Copy automation pairing code" disabled={!enabled} onPress={() => void Clipboard.setStringAsync(tokenRef.current).then(() => setMessage('Pairing code copied. Use it in your script or Shortcut.'))} />
         <Button title="Reset automation pairing" disabled={!enabled || busy} onPress={() => Alert.alert('Reset pairing?', 'Existing scripts and Shortcuts will need the new code.', [{ text: 'Cancel', style: 'cancel' }, { text: 'Reset', onPress: () => { void makeToken().then(async token => { await AsyncStorage.setItem(tokenKey, token); tokenRef.current = token; setMessage('Pairing reset. Copy the new code to your scripts.'); }).catch(error => setMessage(error.message)); } }])} />
@@ -176,11 +176,11 @@ function WidgetSetup() {
   </SafeAreaView>;
 }
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: '#F7F8F2' }, loading: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 16 },
-  content: { padding: 22, gap: 18, paddingBottom: 48 }, title: { fontSize: 30, fontWeight: '700', color: '#253D2B' },
-  heading: { fontSize: 16, fontWeight: '600', color: '#253322' }, body: { fontSize: 14, lineHeight: 21, color: '#65715F' },
-  small: { fontSize: 12, lineHeight: 18, color: '#65715F' }, section: { backgroundColor: 'white', padding: 18, borderRadius: 14, gap: 14 },
+  root: { flex: 1, backgroundColor: '#F4F4F4' }, loading: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 16 },
+  content: { padding: 22, gap: 18, paddingBottom: 48 }, title: { fontSize: 30, fontWeight: '700', color: '#101010' },
+  heading: { fontSize: 16, fontWeight: '600', color: '#101010' }, body: { fontSize: 14, lineHeight: 21, color: '#606060' },
+  small: { fontSize: 12, lineHeight: 18, color: '#606060' }, section: { backgroundColor: 'white', padding: 18, borderRadius: 14, gap: 14 },
   row: { flexDirection: 'row', alignItems: 'center', gap: 12 }, error: { color: '#A54D3C', fontSize: 14, lineHeight: 21 },
-  input: { minHeight: 100, maxHeight: 180, borderWidth: 1, borderColor: '#D5DDCD', borderRadius: 8, padding: 12, textAlignVertical: 'top' },
-  village: { borderTopWidth: 1, borderTopColor: '#E4E8DC', paddingTop: 14, gap: 6 },
+  input: { minHeight: 100, maxHeight: 180, borderWidth: 1, borderColor: '#D5D5D5', borderRadius: 8, padding: 12, textAlignVertical: 'top' },
+  village: { borderTopWidth: 1, borderTopColor: '#E4E4E4', paddingTop: 14, gap: 6 },
 });
