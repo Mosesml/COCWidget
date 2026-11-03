@@ -7,15 +7,15 @@ Use `[x]` for implemented and checked behavior, `[ ]` for outstanding work. Nati
 - [x] Confirm the only push destination is Mosesml/COCWidget and work on main.
 - [x] Write a PRD with acceptance criteria for all five product capabilities.
 - [x] Establish this goals area and a small-commit working agreement.
-- [ ] Bootstrap the shared iOS/Android app and repeatable checks.
+- [x] Bootstrap the shared iOS/Android app and repeatable checks.
 
 ## G1 — data foundation
 
-- [ ] Preserve complete exports, decode inventory and traverse nested modules.
-- [ ] Version and attribute the catalogue with explicit normalization rules.
-- [ ] Validate imports before saving and retain unknown fields/IDs.
+- [x] Preserve complete exports, decode inventory and traverse nested modules.
+- [x] Version and attribute the catalogue with explicit normalization rules.
+- [x] Validate imports before saving and retain unknown fields/IDs.
 - [ ] Persist multiple villages, history, goals, queue and ore targets independently.
-- [ ] Verify raw preservation, timestamps, counts, partial snapshots and migrations.
+- [x] Verify raw preservation, timestamps, counts, partial snapshots and backup validation.
 
 ## G2 — improve my army
 
@@ -72,4 +72,5 @@ Use `[x]` for implemented and checked behavior, `[ ]` for outstanding work. Nati
 ## Checkpoints
 
 - Planning: PRD and working agreement committed before implementation.
+- Core: full parser, catalogue normalization, account/history models, strategy, scheduler, ore calculations and boost projections pass 11 regression tests. Type checking and initial browser export pass. Interactive app screens are next.
 

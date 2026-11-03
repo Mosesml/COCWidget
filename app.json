@@ -1,0 +1,25 @@
+{
+  "expo": {
+    "name": "COCWidget",
+    "slug": "coc-widget",
+    "version": "0.1.0",
+    "scheme": "cocwidget",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.mosesml.cocwidget"
+    },
+    "android": {
+      "package": "com.mosesml.cocwidget"
+    },
+    "web": {
+      "bundler": "metro",
+      "name": "COCWidget"
+    },
+    "plugins": [
+      "expo-sharing",
+      "expo-widgets"
+    ]
+  }
+}
