@@ -13,7 +13,7 @@ Current work removes the website and prioritizes Android. Historical browser che
 | Updated automatic file/clipboard receiver on emulator | Pass: enablement gate, file delivery, cold receiver start, atomic-file watcher and installed-widget update without a Save prompt. |
 | Export-menu runner using synthetic development source | Pass: interactive calibration, Settings/More Settings/Copy/menu cleanup, fresh clipboard validation and native widget acknowledgement. |
 | Export-menu calibration against real Clash client | Not verified; no live client/device profile has been established here. |
-| Native iOS compilation | Pass: app and widget compile unsigned for simulator on GitHub macOS/Xcode, commit `4eabfa0`. Physical installation/behavior remains unverified. |
+| Native iOS compilation | Pass: app and widget compile unsigned for simulator on GitHub macOS/Xcode, commit `53c67be`. Physical installation/behavior remains unverified. |
 | Isolated iOS widget SDK runtime | 42 states pass: three sizes, full-color/accented, overview/selected/removed villages, active/expired timers and empty state. |
 | Scriptable iPhone alternative | Bundle generation and simulated API execution pass. No physical iPhone claim. |
 
@@ -71,3 +71,9 @@ APK inspection after permission cleanup lists Internet, Vibrate and the generate
 Actual recovery was then tested: after backing up and intentionally corrupting only the synthetic file generation, the app showed its unreadable-data state. Selecting the 2.92 MB JSON through the system Downloads picker and confirming Restore recovered one village with five snapshots and republished the widget. No reset or manual repair was needed. The permission-restricted universal APK was then installed for the final delivery check. APK zip alignment passes the 16 KB packaging check (`zipalign -c -P 16 4`); no 16 KB-page device runtime claim is made.
 
 Final permission-restricted universal APK: installed successfully, app force-stopped, existing large export delivered through the real CLI, workspace loaded from its private file, and `unchanged` / native publication acknowledgement received. This establishes that broad storage/overlay permissions are unnecessary for the implemented sync path.
+
+The final paired clipboard path was also rerun after storage/security changes: rebuilt debug app → the calibrated development-only Settings/More Settings/Copy source → fresh `#AUTOTEST` JSON → paired clipboard receiver → file-backed persistence → native widget acknowledgement. It passed. The standalone release preview was reinstalled afterward, and the temporary native packager/tunnel/test emulator were stopped. This remains a synthetic source test, with no live Clash profile claimed.
+
+## Final hosted verification
+
+Both jobs in [Native compilation](https://github.com/Mosesml/COCWidget/actions/runs/41593191976) pass at final code commit `53c67be`: Android debug compilation across the default ABI set and the unsigned iOS app/extension simulator build. The SDK setup correction is verified on the hosted runner. Main-branch App checks also pass, including 41 automated tests, production Android/iOS JavaScript exports, regenerated Scriptable artifact consistency and 42 iOS SDK runtime layout states.

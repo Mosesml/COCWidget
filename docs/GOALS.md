@@ -73,3 +73,5 @@ Current priority from Moses: **widget + working automatic refresh, Android first
 - [x] Block unused Android overlay and broad storage permissions; APK inspection confirms their removal.
 
 - [x] Actual unreadable-workspace recovery through the Android system file picker restored the 2.92 MB backup and five snapshots.
+
+- Final audit verification: main code commit `53c67be` passes hosted native Android and iOS compilation, plus App checks (41 tests and 42 isolated iOS layout states). Final synthetic clipboard export, standalone file sync, large-history cold restart and unreadable-workspace recovery all pass. Temporary packager/emulator were stopped. Physical iPhone, live Clash calibration and OEM/idle/minimum-size checks remain open.

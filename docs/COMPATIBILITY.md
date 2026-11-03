@@ -34,7 +34,7 @@ For a phone-only future route, Android's AccessibilityService can dispatch gestu
 
 The native app/widget now declare iOS/iPadOS **17+** because configurable WidgetKit uses App Intents. Physical installation needs Xcode/provisioning/App Groups or an appropriately signed distributed build. JavaScript export and runtime-layout checks alone do not establish native installation.
 
-The optional Scriptable integration avoids compiling/signing our own app. Install the Scriptable app, add the bundled script and pass copied export JSON from Shortcuts. It has independent local storage and iOS-managed widget refresh. Physical-device verification remains required. See [iPhone setup and investigated alternatives](IOS_SETUP.md).
+The optional Scriptable integration avoids compiling/signing our own app. The [Scriptable App Store listing](https://apps.apple.com/app/scriptable/id1405459188) currently requires iOS/iPadOS 15.5+, potentially extending this alternative below the native app's 17.0 minimum; our script is not physically verified on those versions. Install the Scriptable app, add the bundled script and pass copied export JSON from Shortcuts. It has independent local storage and iOS-managed widget refresh. Physical-device verification remains required. See [iPhone setup and investigated alternatives](IOS_SETUP.md).
 
 ## Game automation release boundary
 

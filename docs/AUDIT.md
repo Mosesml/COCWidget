@@ -37,11 +37,11 @@ The dependency fixes address [glob cancellation](https://github.com/advisories/G
 - `npm run check`: TypeScript, generated Scriptable bundle, 41 domain/automation/platform/persistence tests and Android/iOS production JavaScript exports pass.
 - `npm run check:widget-layout`: layout registration and 42 states rendered with Expo's actual isolated iOS SDK JavaScript runtime pass (three sizes, full color/accented, selected/overview/removed villages, before/after completion, empty state).
 - Native Android debug and universal standalone release compilation pass. The APK manifest/native libraries declare API 24 minimum and all four ABIs. Real paired CLI import, native publication and launcher rendering exercised with the standalone app and Metro stopped.
-- Native iOS app/extension compilation passes in [the hosted Xcode job](https://github.com/Mosesml/COCWidget/actions/runs/41590410789/job/125765593709), commit `4eabfa0`. It is an unsigned simulator build, not an installable physical-phone IPA.
+- Native iOS app/extension compilation passes in [the hosted Xcode job](https://github.com/Mosesml/COCWidget/actions/runs/41593191976/job/125774424609), final code commit `53c67be`. It is an unsigned simulator build, not an installable physical-phone IPA.
 - Scriptable's generated distributable executes in a simulated documented API: saves complete supplied JSON, rejects malformed data, preserves newer data, selects independent villages and never reads the clipboard during widget/Shortcut execution. Physical Scriptable storage/refresh/rendering is not verified.
-- Native CI testing found obsolete SDK setup defaults and then the SDK 37 package's exact repository name (`platforms;android-37.0`). Explicit packages replace the defaults; local installed SDK metadata confirms that package name. Follow the native workflow for hosted Android compilation results.
+- Native CI testing found obsolete SDK setup defaults and then the SDK 37 package's exact repository name (`platforms;android-37.0`). Explicit packages replace the defaults; local installed SDK metadata confirms that package name. The corrected final workflow [passes hosted Android compilation](https://github.com/Mosesml/COCWidget/actions/runs/41593191976/job/125774424836) as well as iOS.
 
-See [VALIDATION.md](VALIDATION.md) for screenshots and earlier synthetic menu-runner tests. None establish a working live Clash menu profile.
+The synthetic calibrated menu/clipboard path was rerun successfully after pairing and file-persistence changes, in addition to standalone file delivery. See [VALIDATION.md](VALIDATION.md) for screenshots and the source-menu verification boundary. None establish a working live Clash menu profile.
 
 ## Full interface review
 

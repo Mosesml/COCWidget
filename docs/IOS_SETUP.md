@@ -6,7 +6,7 @@ There are two paths: the native COCWidget app and an optional Scriptable widget.
 
 Status: implemented, bundled and exercised against a simulated Scriptable API in Node. **Not yet tested on a physical iPhone.** Installability, actual Shortcuts execution, storage sharing and widget rendering/refresh need that test.
 
-1. Install [Scriptable](https://scriptable.app/) on the iPhone. Save [COCWidget.js](../integrations/scriptable/COCWidget.js) as a script named **COCWidget**. Use the GitHub file's Raw/Download action, not its rendered page; the file includes the parser and catalogue, so no extra scripts are required.
+1. Install [Scriptable](https://apps.apple.com/app/scriptable/id1405459188) on the iPhone. Its current App Store listing requires iOS/iPadOS 15.5+, so this route may also cover devices below our native app's iOS 17 minimum; our integration still needs physical-device verification. Save [COCWidget.js](../integrations/scriptable/COCWidget.js) as a script named **COCWidget**. Use the GitHub file's Raw/Download action, not its rendered page; the file includes the parser and catalogue, so no extra scripts are required.
 2. In Clash, use Settings → More Settings → Data Export → Copy (menu names/availability may differ by client version).
 3. Run COCWidget inside Scriptable and choose **Import copied JSON**. This action explicitly reads the clipboard. The script stores a complete latest export and a small widget cache locally; it makes no network requests.
 4. Add a Scriptable Home Screen widget and edit it: select **COCWidget**, set **When Interacting** to Run Script, and choose a small, medium or large size. Set **Parameter** to a player tag such as `#ABC123`, or `all`. Blank means all. Import each village separately for multiple accounts.
@@ -30,7 +30,7 @@ npm run build:scriptable
 
 Minimum declared deployment target: **iOS/iPadOS 17.0**. Configurable widgets use `AppIntentConfiguration`; declaring 16.4 was inconsistent and has been corrected for the app and extension.
 
-A full Xcode installation is needed for a local native build. This workspace currently has Command Line Tools only. The repository's **Native compilation** workflow successfully compiled the app and widget on a GitHub macOS runner at commit `4eabfa0`: [verified iOS job](https://github.com/Mosesml/COCWidget/actions/runs/41590410789/job/125765593709). It produces an unsigned simulator app. A simulator build is not an installable iPhone IPA and does not establish signing, provisioning, App Group access on a phone or successful Home Screen behavior.
+A full Xcode installation is needed for a local native build. This workspace currently has Command Line Tools only. The repository's **Native compilation** workflow successfully compiled the app and widget on a GitHub macOS runner at commit `53c67be`: [verified iOS job](https://github.com/Mosesml/COCWidget/actions/runs/41593191976/job/125774424609). It produces an unsigned simulator app. A simulator build is not an installable iPhone IPA and does not establish signing, provisioning, App Group access on a phone or successful Home Screen behavior.
 
 ```sh
 npm ci
