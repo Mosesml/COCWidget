@@ -5,6 +5,10 @@ import { validateProfile, type ExportAction, type ExportProfile } from './export
 
 const exec = promisify(execFile);
 const gamePackage = 'com.supercell.clashofclans';
+export function isSourceFocused(windows: string, packageName: string) {
+  const focused = windows.split('\n').find(line => line.includes('mCurrentFocus='));
+  return focused?.includes(`${packageName}/`) ?? false;
+}
 export class AndroidExporter {
   readonly packageName: string;
   constructor(readonly device: AndroidDevice, readonly testSource = false) {
@@ -28,9 +32,10 @@ export class AndroidExporter {
     await wait(waitMs); await this.assertForeground();
   }
   async assertForeground() {
-    const windows = await this.device.run('shell', 'dumpsys', 'window', 'windows');
-    const focused = windows.split('\n').find(line => line.includes('mCurrentFocus='));
-    if (!focused?.includes(`${this.packageName}/`)) throw new Error('The export source is not focused. Unlock the device, close overlays, and retry. No menu tap was sent.');
+    // Android 14 keeps mCurrentFocus in the displays section, not the windows section.
+    let windows = await this.device.run('shell', 'dumpsys', 'window', 'displays');
+    if (!windows.includes('mCurrentFocus=')) windows = await this.device.run('shell', 'dumpsys', 'window');
+    if (!isSourceFocused(windows, this.packageName)) throw new Error('The export source is not focused. Unlock the device, close overlays, and retry. No menu tap was sent.');
   }
   async action(action: ExportAction) {
     await this.assertForeground();
