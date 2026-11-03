@@ -13,13 +13,13 @@ Current priority from Moses: **widget + working automatic refresh, Android first
 - [x] File/directory watcher, partial writes, atomic replacement and acknowledgement retries.
 - [x] Device-specific export profile calibration and connected Android menu runner.
 - [x] Foreground/screen checks, fresh-export guard and optional expected player tag.
-- [x] Type checking and 24 domain/automation tests.
+- [x] Type checking and 25 domain/automation tests.
 - [x] Android and iOS JavaScript bundle exports after removing the website.
-- [ ] Compile the updated native bridge and standalone Android application.
-- [ ] Verify script acknowledgement and automatic widget refresh on the emulator.
-- [ ] Verify the export-menu runner end to end using the development-only synthetic export source.
+- [x] Compile the updated native bridge, Android debug app and standalone APK.
+- [x] Verify script acknowledgement and automatic widget refresh on the emulator, including waking a stopped companion.
+- [x] Verify the calibration wizard and export-menu runner end to end using the development-only synthetic source.
 - [ ] Verify calibration and repeated export against a real installed Clash client.
-- [ ] Record final checks and push clean checkpoints.
+- [x] Record final checks and push clean checkpoints.
 
 ## iOS phase (retained in PRD)
 
@@ -47,4 +47,8 @@ Current priority from Moses: **widget + working automatic refresh, Android first
 ## Checkpoints
 
 - Initial foundation: six commits established parser, catalogue, widgets and native/browser prototype. Moses reprioritized the widget and script; website scope was removed.
-- Automatic delivery: 24 tests pass, including save-before-ack, missing-ack retry, stale/wrong-village guards and atomic-file watching. Native receiver, ADB file delivery and calibrated menu runner are implemented; updated device verification is in progress.
+- Automatic delivery: 25 tests pass, including save-before-ack, missing-ack retry, stale/wrong-village guards and atomic-file watching. Native receiver, ADB file delivery and calibrated menu runner are implemented; updated device verification is in progress.
+
+- Android device checkpoint: file delivery and the atomic-file watcher update an installed widget without a Save prompt, after one-time enablement. The calibrated synthetic export sequence produces fresh clipboard JSON and receives a native widget acknowledgement. The Android 14 focus query was corrected from actual device output. Debug and standalone APK compilation pass. Live Clash calibration remains open.
+
+- Final Android check: the repeated synthetic export loop completed two unattended 60-second cycles. The standalone APK then accepted a 307,618-byte export with Metro stopped and the companion initially force-stopped; an installed widget showed the updated timer. No website is required. Live Clash device calibration and iOS device work remain open.

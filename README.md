@@ -41,6 +41,18 @@ Calibration records Settings → More Settings → Data Export → Copy and the 
 
 This route requires the host script, USB debugging, an unlocked connected Android device and calibration for that device/game layout. It briefly occupies the device each cycle. It is not silent background export from an ordinary locked phone. Stop with Ctrl+C. A failed export stops the menu runner rather than repeating uncertain taps. See [the automation guide](docs/IMPORT_AUTOMATION.md) for setup and current verification boundaries.
 
+## Standalone build
+
+The installed release preview works without the native development server:
+
+```sh
+npx expo prebuild --platform android --no-install
+cd android
+./gradlew :app:assembleRelease
+```
+
+The generated APK is under `android/app/build/outputs/apk/release/`. This template currently uses the development signing key; public distribution/signing is a later milestone.
+
 ## Checks and progress
 
 ```sh
@@ -50,7 +62,7 @@ npm run check:widget-layout   # isolated iOS layout registry (after iOS prebuild
 
 - [PRD and platform roadmap](docs/PRD.md)
 - [Goals/checkpoints](docs/GOALS.md)
-- [Validation record](docs/VALIDATION.md)
+- [Validation record](docs/VALIDATION.md) — includes actual emulator, repeated synthetic export and standalone large-file checks
 - [Architecture](docs/ARCHITECTURE.md)
 - [Data model and assumptions](docs/DATA_MODEL.md)
 - [Third-party notices](THIRD_PARTY.md)
